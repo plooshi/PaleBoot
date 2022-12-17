@@ -145,7 +145,7 @@ int main() {
 
     if (cpid != 0x8010 && cpid != 0x8015) {
         if (access("./boot/iBSS.img4", F_OK) != 0) {
-            printf("Could'nt find iBSS!.\n");
+            printf("Couldn't find iBSS!\n");
         } else {
             if (send_file(client, "./boot/iBSS.img4") != 0) {
                 printf("Failed to send iBSS!\n");
