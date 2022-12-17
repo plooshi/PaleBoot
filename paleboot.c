@@ -87,6 +87,10 @@ int run_command(irecv_client_t client, const char *command) {
     return 0;
 }
 
+struct irecv_client_private {
+	struct irecv_device_info device_info;
+};
+
 int main() {
     bool has_ibss = false, has_t8010 = false, has_t8015 = false;
     FILE *fs_file;
