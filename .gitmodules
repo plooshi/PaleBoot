@@ -1,0 +1,3 @@
+[submodule "deps/gaster"]
+	path = deps/gaster
+	url = https://github.com/palera1n/gaster
