@@ -48,8 +48,6 @@ irecv_client_t get_client() {
 
     irecv_client_t client = NULL;
 	for (i = 0; i <= 5; i++) {
-		printf("Attempting to connect... \n");
-
 		irecv_error_t err = irecv_open_with_ecid(&client, ecid);
 		if (err == IRECV_E_UNSUPPORTED) {
 			fprintf(stderr, "ERROR: %s\n", irecv_strerror(err));
