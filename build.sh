@@ -13,5 +13,5 @@ if [ ! -f ".compiled" ]; then
     touch .compiled
 fi
 cd ../..
-clang -fuse-ld=lld -L./libs -I./incl -L/usr/local/lib -L/usr/local/lib64 -lcrypto -lusb-1.0 -limobiledevice-glue-1.0 -lirecovery-1.0 \
+clang -fuse-ld=lld -static -L./libs -I./incl -L/usr/local/lib -L/usr/local/lib64 -lcrypto -lusb-1.0 -limobiledevice-glue-1.0 -lirecovery-1.0 \
     paleboot.c ./deps/gaster/gaster.c ./deps/gaster/lzfse.c -O2 -o PaleBoot -DHAVE_LIBUSB -DVERSION=\"1.0-paleboot1\"
