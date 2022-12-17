@@ -102,11 +102,6 @@ int main() {
         return 1;
     }
 
-    if (access("./boot/iBSS.img4", F_OK) == 0) {
-        printf("Found iBSS.\n");
-        has_ibss = true;
-    }
-
     if (access("./boot/payload_t8010.bin", F_OK) == 0) {
         printf("Found payload (A10).\n");
         has_t8010 = true;
@@ -144,14 +139,22 @@ int main() {
 
     irecv_client_t client = get_client();
 
-    if (has_ibss) {
-        if (send_file(client, "./boot/iBSS.img4") != 0) {
-            printf("Failed to send iBSS!\n");
-            return 1;
+    unsigned cpid = client->device_info.cpid;
+
+    client = get_client();
+
+    if (cpid != 0x8010 && cpid != 0x8015) {
+        if (access("./boot/iBSS.img4", F_OK) != 0) {
+            printf("Could'nt find iBSS!.\n");
+        } else {
+            if (send_file(client, "./boot/iBSS.img4") != 0) {
+                printf("Failed to send iBSS!\n");
+                return 1;
+            }
+            sleep(3);
+            
+            client = get_client();
         }
-        sleep(3);
-        
-        client = get_client();
     }
 
     sleep(1);
