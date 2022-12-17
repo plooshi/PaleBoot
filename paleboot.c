@@ -153,24 +153,25 @@ int main() {
             printf("Failed to send iBSS!\n");
             return 1;
         }
-        sleep(10);
-        //sleep(4);
+        sleep(3);
+        
+        client = get_client();
     }
-    client = get_client();
 
+    sleep(1);
     if (send_file(client, "./boot/ibot.img4") != 0) {
         printf("Failed to send iBoot!\n");
         return 1;
     }
 
-    client = get_client();
-
     if (has_t8010 || has_t8015) {
+        client = get_client();
+
         sleep(3);
         run_command(client, "dorwx");
-    }
 
-    client = get_client();
+        client = get_client();
+    }
 
     if (has_t8010) {
         sleep(2);
@@ -178,15 +179,17 @@ int main() {
             printf("Failed to send payload!\n");
             return 1;
         }
+
+        client = get_client();
     } else if (has_t8015) {
         sleep(2);
         if (send_file(client, "./boot/payload_t8015.bin") != 0) {
             printf("Failed to send payload!\n");
             return 1;
         }
-    }
 
-    client = get_client();
+        client = get_client();
+    }
 
     if (has_t8010 || has_t8015) {
         sleep(3);
@@ -217,13 +220,16 @@ int main() {
             printf("Failed to boot!\n");
             return 1;
         }
+        
+        client = get_client();
     }
-
-    client = get_client();
     
     sleep(2);
-    if (run_command(client, "fsboot") != 0) {
-        printf("Failed to fsboot, ignoring (on tethered, this is an issue)\n");
+
+    int fsboot_ret = run_command(client, "fsboot");
+    if (fsboot_ret != 0 && fsboot_ret != -1) {
+        printf("Failed to fsboot!\n");
+        return 1;
     }
      
     return 0;
