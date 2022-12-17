@@ -147,12 +147,7 @@ int main() {
     irecv_client_t client = get_client();
 
     if (has_ibss) {
-        if (send_file(client, "./boot/iBSS.img4") == -1) {
-            printf("Failed to send iBSS!\n");
-            return 1;
-        }
-        sleep(2);
-        if (send_file(client, "./boot/iBSS.img4") == -1) {
+        if (send_file(client, "./boot/iBSS.img4") != 0) {
             printf("Failed to send iBSS!\n");
             return 1;
         }
@@ -160,7 +155,7 @@ int main() {
     }
 
     sleep(1);
-    if (send_file(client, "./boot/ibot.img4") == -1) {
+    if (send_file(client, "./boot/ibot.img4") != 0) {
         printf("Failed to send iBoot!\n");
         return 1;
     }
@@ -172,13 +167,13 @@ int main() {
 
     if (has_t8010) {
         sleep(2);
-        if (send_file(client, "./boot/payload_t8010.bin") == -1) {
+        if (send_file(client, "./boot/payload_t8010.bin") != 0) {
             printf("Failed to send payload!\n");
             return 1;
         }
     } else if (has_t8015) {
         sleep(2);
-        if (send_file(client, "./boot/payload_t8015.bin") == -1) {
+        if (send_file(client, "./boot/payload_t8015.bin") != 0) {
             printf("Failed to send payload!\n");
             return 1;
         }
@@ -186,16 +181,27 @@ int main() {
 
     if (has_t8010 || has_t8015) {
         sleep(3);
-        run_command(client, "go");
+        if (run_command(client, "go") != 0) {
+            printf("Failed to run go!\n");
+            return 1;
+        };
         sleep(1);
-        run_command(client, "go xargs -v serial=3");
+        if (run_command(client, "go xargs -v serial=3") != 0) {
+            printf("Failed to set boot args!\n");
+            return 1;
+        };
         sleep(1);
-        run_command(client, "go xfb");
+        if (run_command(client, "go xfb") != 0) {
+            printf("Failed to init framebuffer!\n");
+            return 1;
+        };
         sleep(1);
         char boot_command[18] = "";
-        // go boot disk1s7
         snprintf(boot_command, 18, "go boot %s", fs);
-        run_command(client, boot_command);
+        if (run_command(client, boot_command) != 0) {
+            printf("Failed to boot!\n");
+            return 1;
+        }
     }
 
     sleep(2);
