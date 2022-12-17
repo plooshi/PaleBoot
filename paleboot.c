@@ -106,10 +106,6 @@ int main() {
         printf("Found iBSS.\n");
         has_ibss = true;
     }
-    if (access("./boot/iBSS.img4", F_OK) == 0) {
-        printf("Found iBSS.\n");
-        has_ibss = true;
-    }
 
     if (access("./boot/payload_t8010.bin", F_OK) == 0) {
         printf("Found payload (A10).\n");
