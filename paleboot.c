@@ -87,10 +87,6 @@ int run_command(irecv_client_t client, const char *command) {
     return 0;
 }
 
-struct irecv_client_private {
-	struct irecv_device_info device_info;
-};
-
 int main() {
     bool has_ibss = false, has_t8010 = false, has_t8015 = false;
     FILE *fs_file;
@@ -104,6 +100,11 @@ int main() {
     if (access("./boot/ibot.img4", F_OK) != 0) {
         printf("Couldn't find iBoot!\n");
         return 1;
+    }
+
+    if (access("./boot/iBSS.img4", F_OK) == 0) {
+        printf("Found iBSS.\n");
+        has_ibss = true;
     }
 
     if (access("./boot/payload_t8010.bin", F_OK) == 0) {
@@ -143,22 +144,14 @@ int main() {
 
     irecv_client_t client = get_client();
 
-    unsigned cpid = client->device_info.cpid;
-
-    client = get_client();
-
-    if (cpid != 0x8010 && cpid != 0x8015) {
-        if (access("./boot/iBSS.img4", F_OK) != 0) {
-            printf("Couldn't find iBSS!\n");
-        } else {
-            if (send_file(client, "./boot/iBSS.img4") != 0) {
-                printf("Failed to send iBSS!\n");
-                return 1;
-            }
-            sleep(3);
-            
-            client = get_client();
+    if (has_ibss) {
+        if (send_file(client, "./boot/iBSS.img4") != 0) {
+            printf("Failed to send iBSS!\n");
+            return 1;
         }
+        sleep(3);
+        
+        client = get_client();
     }
 
     sleep(1);
