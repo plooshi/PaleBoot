@@ -81,7 +81,7 @@ int send_file(irecv_client_t client, const char *filename) {
 }
 
 int run_command(irecv_client_t client, const char *command) {
-    irecv_error_t error = irecv_send_command(client, argument);
+    irecv_error_t error = irecv_send_command(client, command);
     if (error != 0) {
 	    printf("%s\n", irecv_strerror(error));
         return error;
