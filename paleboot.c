@@ -34,7 +34,7 @@ void print_progress_bar(double progress) {
 	}
 }
 
-int progress_cb(irecv_client_t get_client(), const irecv_event_t* event) {
+int progress_cb(irecv_client_t client, const irecv_event_t* event) {
 	if (event->type == IRECV_PROGRESS) {
 		print_progress_bar(event->progress);
 	}
@@ -46,9 +46,9 @@ irecv_client_t get_client() {
     int i = 0;
     int64_t ecid = 0;
 
-    irecv_client_t get_client() = NULL;
+    irecv_client_t client = NULL;
 	for (i = 0; i <= 5; i++) {
-		irecv_error_t err = irecv_open_with_ecid(&get_client(), ecid);
+		irecv_error_t err = irecv_open_with_ecid(&client, ecid);
 		if (err == IRECV_E_UNSUPPORTED) {
 			fprintf(stderr, "ERROR: %s\n", irecv_strerror(err));
 			return NULL;
@@ -64,13 +64,13 @@ irecv_client_t get_client() {
 		}
 	}
 
-    return get_client();
+    return client;
 }
 
-int send_file(irecv_client_t get_client(), const char *filename) {
+int send_file(irecv_client_t client, const char *filename) {
 
-    irecv_event_subscribe(get_client(), IRECV_PROGRESS, &progress_cb, NULL);
-	irecv_error_t error = irecv_send_file(get_client(), filename, 1);
+    irecv_event_subscribe(client, IRECV_PROGRESS, &progress_cb, NULL);
+	irecv_error_t error = irecv_send_file(client, filename, 1);
     if (error != 0) {
 	    printf("%s\n", irecv_strerror(error));
         return error;
@@ -78,8 +78,8 @@ int send_file(irecv_client_t get_client(), const char *filename) {
     return 0;
 }
 
-int run_command(irecv_client_t get_client(), const char *command) {
-    irecv_error_t error = irecv_send_command(get_client(), command);
+int run_command(irecv_client_t client, const char *command) {
+    irecv_error_t error = irecv_send_command(client, command);
     if (error != 0) {
 	    printf("%s\n", irecv_strerror(error));
         return error;
@@ -139,8 +139,6 @@ int main() {
         return 1;
     }
 
-    sleep(2);
-
     if (!gaster_reset(&handle)) {
         printf("Failed to reset!\n");
         return 1;
@@ -148,65 +146,83 @@ int main() {
 
     sleep(1);
 
+    irecv_client_t client = get_client();
+
     if (has_ibss) {
-        if (send_file(get_client(), "./boot/iBSS.img4") != 0) {
+        if (send_file(client, "./boot/iBSS.img4") != 0) {
             printf("Failed to send iBSS!\n");
             return 1;
         }
         sleep(10);
         //sleep(4);
     }
-    if (send_file(get_client(), "./boot/ibot.img4") != 0) {
+    client = get_client();
+
+    if (send_file(client, "./boot/ibot.img4") != 0) {
         printf("Failed to send iBoot!\n");
         return 1;
     }
 
+    client = get_client();
+
     if (has_t8010 || has_t8015) {
         sleep(3);
-        run_command(get_client(), "dorwx");
+        run_command(client, "dorwx");
     }
+
+    client = get_client();
 
     if (has_t8010) {
         sleep(2);
-        if (send_file(get_client(), "./boot/payload_t8010.bin") != 0) {
+        if (send_file(client, "./boot/payload_t8010.bin") != 0) {
             printf("Failed to send payload!\n");
             return 1;
         }
     } else if (has_t8015) {
         sleep(2);
-        if (send_file(get_client(), "./boot/payload_t8015.bin") != 0) {
+        if (send_file(client, "./boot/payload_t8015.bin") != 0) {
             printf("Failed to send payload!\n");
             return 1;
         }
     }
 
+    client = get_client();
+
     if (has_t8010 || has_t8015) {
         sleep(3);
-        if (run_command(get_client(), "go") != 0) {
+        if (run_command(client, "go") != 0) {
             printf("Failed to run go!\n");
             return 1;
         };
         sleep(1);
-        if (run_command(get_client(), "go xargs -v serial=3") != 0) {
+        client = get_client();
+
+        if (run_command(client, "go xargs -v serial=3") != 0) {
             printf("Failed to set boot args!\n");
             return 1;
         };
         sleep(1);
-        if (run_command(get_client(), "go xfb") != 0) {
+        client = get_client();
+
+        if (run_command(client, "go xfb") != 0) {
             printf("Failed to init framebuffer!\n");
             return 1;
         };
         sleep(1);
+        client = get_client();
+
         char boot_command[18] = "";
         snprintf(boot_command, 18, "go boot %s", fs);
-        if (run_command(get_client(), boot_command) != 0) {
+        if (run_command(client, boot_command) != 0) {
             printf("Failed to boot!\n");
             return 1;
         }
     }
 
+    client = get_client();
+    
     sleep(2);
-    if (run_command(get_client(), "fsboot") != 0) {
+    if (run_command(client, "fsboot") != 0) {
         printf("Failed to fsboot, ignoring (on tethered, this is an issue)\n");
     }
      
