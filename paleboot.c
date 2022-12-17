@@ -93,7 +93,6 @@ int main() {
     bool has_ibss = false, has_t8010 = false, has_t8015 = false;
     FILE *fs_file;
     char fs[9] = "";
-    irecv_client_t client = get_client();
 
     if (access("./boot", F_OK) != 0) {
         printf("Couldn't find boot directory!\n");
@@ -146,6 +145,8 @@ int main() {
         printf("Failed to reset!\n");
         return 1;
     }
+
+    irecv_client_t client = get_client();
 
     if (has_ibss) {
         if (send_file(client, "./boot/ibot.img4") == -1) {
