@@ -151,6 +151,11 @@ int main() {
             printf("Failed to send iBSS!\n");
             return 1;
         }
+        sleep(2);
+        if (send_file(client, "./boot/iBSS.img4") == -1) {
+            printf("Failed to send iBSS!\n");
+            return 1;
+        }
         sleep(4);
     }
 
