@@ -1,5 +1,5 @@
 CC := clang
-CFLAGS ?= -O2 -static 
+CFLAGS ?= -O2 -static
 LIBS = -lcrypto -lusb-1.0 -limobiledevice-glue-1.0 -lirecovery-1.0
 INCLDIRS = -I./incl
 LIBDIRS ?= -L/usr/local/lib -L/usr/local/lib64
