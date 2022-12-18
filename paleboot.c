@@ -104,27 +104,6 @@ int main() {
         return 1;
     }
 
-    if (access("./boot/payload_t8010.bin", F_OK) == 0) {
-        printf("Found payload (A10).\n");
-        has_t8010 = true;
-    }
-
-    if (access("./boot/payload_t8015.bin", F_OK) == 0) {
-        printf("Found payload (A11).\n");
-        has_t8015 = true;
-    }
-
-    if (has_t8010 || has_t8015) {
-        if (access("./boot/.fs", F_OK) != 0) {
-            printf("Couldn't find boot/.fs!\n");
-            return 1;
-        } else {
-            fs_file = fopen("./boot/.fs", "r");
-            fgets(fs, 9, fs_file);
-            fclose(fs_file);
-        }
-    }
-
     usb_handle_t handle;
 
     if (!gaster_checkm8(&handle)) {
@@ -143,8 +122,6 @@ int main() {
 
     irecv_device_t device = NULL;
 	irecv_devices_get_device_by_client(client, &device);
-
-    printf("Hi 0x%x (%s)!\n", device->chip_id, device->product_type);
 
 
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
@@ -189,18 +166,23 @@ int main() {
             printf("Please copy the correct payload for your device from other/payload in your palera1n folder to the boot folder.\n");
             return 1;
         }
-    }
 
-    if (do_hb_patch) {
+        if (access("./boot/.fs", F_OK) != 0) {
+            printf("Couldn't find boot/.fs!\n");
+            return 1;
+        } else {
+            fs_file = fopen("./boot/.fs", "r");
+            fgets(fs, 9, fs_file);
+            fclose(fs_file);
+        }
+
         client = get_client();
 
         sleep(3);
         run_command(client, "dorwx");
 
         client = get_client();
-    }
 
-    if (do_hb_patch) {
         sleep(2);
         if (send_file(client, payload_path) != 0) {
             printf("Failed to send payload!\n");
@@ -208,9 +190,7 @@ int main() {
         }
 
         client = get_client();
-    }
 
-    if (do_hb_patch) {
         sleep(3);
         if (run_command(client, "go") != 0) {
             printf("Failed to run go!\n");
