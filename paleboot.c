@@ -103,11 +103,6 @@ int main() {
         return 1;
     }
 
-    if (access("./boot/iBSS.img4", F_OK) == 0) {
-        printf("Found iBSS.\n");
-        has_ibss = true;
-    }
-
     if (access("./boot/payload_t8010.bin", F_OK) == 0) {
         printf("Found payload (A10).\n");
         has_t8010 = true;
@@ -148,18 +143,28 @@ int main() {
     irecv_device_t device = NULL;
 	irecv_devices_get_device_by_client(client, &device);
 
-    printf("Hi %x (%s)", device->chip_id, device->product_type);
+    printf("Hi 0x%x (%s)\n", device->chip_id, device->product_type);
     exit(0);
 
-    if (has_ibss) {
-        if (send_file(client, "./boot/iBSS.img4") != 0) {
-            printf("Failed to send iBSS!\n");
+
+    if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
+        if (access("./boot/iBSS.img4", F_OK) != 0) {
+            printf("Could not find iBSS!\n");
             return 1;
+        } else {
+            if (send_file(client, "./boot/iBSS.img4") != 0) {
+                printf("Failed to send iBSS!\n");
+                return 1;
+            }
+            sleep(3);
+            
+            client = get_client();
         }
-        sleep(3);
-        
-        client = get_client();
     }
+
+    bool do_hb_patch = strstr("iPhone9,", device->product_type) == device->product_type || 
+        (strstr("iPhone10,", device->product_type) == device->product_type && strstr("iPhone10,3", device->product_type) != device->product_type &&
+        strstr("iPhone10,6", device->product_type) != device->product_type);
 
     sleep(1);
     if (send_file(client, "./boot/ibot.img4") != 0) {
@@ -167,7 +172,26 @@ int main() {
         return 1;
     }
 
-    if (has_t8010 || has_t8015) {
+    char payload_path[25] = "not.found";
+    if (do_hb_patch) {
+        if (access("./boot/payload_t8010.bin", F_OK) == 0) {
+            printf("Found payload (A10).\n");
+            strcpy(payload_path, "./boot/payload_t8010.bin");
+        }
+
+        if (access("./boot/payload_t8015.bin", F_OK) == 0) {
+            printf("Found payload (A11).\n");
+            strcpy(payload_path, "./boot/payload_t8015.bin");
+        }
+        
+        if (strcmp(payload_path, "not.found")) {
+            printf("PaleBoot detected your device needs payload, but we could not find it in the boot folder.\n");
+            printf("Please copy the correct payload for your device from other/payload in your palera1n folder to the boot folder.\n");
+            return 1;
+        }
+    }
+
+    if (do_hb_patch) {
         client = get_client();
 
         sleep(3);
@@ -176,17 +200,9 @@ int main() {
         client = get_client();
     }
 
-    if (has_t8010) {
+    if (do_hb_patch) {
         sleep(2);
-        if (send_file(client, "./boot/payload_t8010.bin") != 0) {
-            printf("Failed to send payload!\n");
-            return 1;
-        }
-
-        client = get_client();
-    } else if (has_t8015) {
-        sleep(2);
-        if (send_file(client, "./boot/payload_t8015.bin") != 0) {
+        if (send_file(client, payload_path) != 0) {
             printf("Failed to send payload!\n");
             return 1;
         }
@@ -194,7 +210,7 @@ int main() {
         client = get_client();
     }
 
-    if (has_t8010 || has_t8015) {
+    if (do_hb_patch) {
         sleep(3);
         if (run_command(client, "go") != 0) {
             printf("Failed to run go!\n");
