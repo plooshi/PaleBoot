@@ -4,6 +4,7 @@
 #include <libirecovery.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 void print_progress_bar(double progress) {
 	int i = 0;
