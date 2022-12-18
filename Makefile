@@ -13,7 +13,7 @@ submodules:
 
 gaster:
 	cp gaster.mk deps/gaster
-	make -f deps/gaster/gaster.mk -C deps/gaster
+	make -f gaster.mk -C deps/gaster
 
 paleboot:
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(GASTER_FILES) $(LIBDIRS) $(INCLDIRS) paleboot.c -o PaleBoot -DHAVE_LIBUSB -DVERSION=\"1.0-paleboot1\"
