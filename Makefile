@@ -12,16 +12,8 @@ submodules:
 	git submodule update --init --remote --recursive || true
 
 gaster:
-	cd deps/gaster
-	cat Makefile | sed 's/-o gaster/-o libgaster.a/' | tee Makefile > /dev/null
-	cat gaster.c | sed 's/main/gaster_main/' | sed 's/static //' | sed 's/unsigned usb_timeout;/unsigned usb_timeout = 5;/' | tee gaster.c > /dev/null
-	make libusb -C deps/gaster
-	xxd -iC payload_A9.bin payload_A9.h
-	xxd -iC payload_notA9.bin payload_notA9.h
-	xxd -iC payload_notA9_armv7.bin payload_notA9_armv7.h
-	xxd -iC payload_handle_checkm8_request.bin payload_handle_checkm8_request.h
-	xxd -iC payload_handle_checkm8_request_armv7.bin payload_handle_checkm8_request_armv7.h
-	touch .compiled
+	cp gaster.mk deps/gaster
+	make -f deps/gaster/gaster.mk -C deps/gaster
 
 paleboot:
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(GASTER_FILES) $(LIBDIRS) $(INCLDIRS) paleboot.c -o PaleBoot -DHAVE_LIBUSB -DVERSION=\"1.0-paleboot1\"
