@@ -143,8 +143,7 @@ int main() {
     irecv_device_t device = NULL;
 	irecv_devices_get_device_by_client(client, &device);
 
-    printf("Hi 0x%x (%s)\n", device->chip_id, device->product_type);
-    exit(0);
+    printf("Hi 0x%x (%s)!\n", device->chip_id, device->product_type);
 
 
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
