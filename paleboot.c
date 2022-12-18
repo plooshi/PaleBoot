@@ -1,5 +1,4 @@
 #include <gaster.h>
-#include <libusb-1.0/libusb.h>
 #include <stdio.h>
 #include <libirecovery.h>
 #include <unistd.h>

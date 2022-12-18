@@ -6,6 +6,12 @@ LIBDIRS ?= -L/usr/local/lib -L/usr/local/lib64
 LDFLAGS ?= -fuse-ld=lld
 GASTER_FILES = ./deps/gaster/gaster.c ./deps/gaster/lzfse.c
 
+ifeq ($(shell uname),Darwin)
+USBLIB_FLAGS=
+else
+USBLIB_FLAGS=-DHAVE_LIBUSB
+endif
+
 all: submodules gaster paleboot
 
 submodules:
@@ -16,4 +22,4 @@ gaster:
 	make -f gaster.mk -C deps/gaster
 
 paleboot:
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(GASTER_FILES) $(LIBDIRS) $(INCLDIRS) paleboot.c -o PaleBoot -DHAVE_LIBUSB -DVERSION=\"1.0-paleboot1\"
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(GASTER_FILES) $(LIBDIRS) $(INCLDIRS) $(USBLIB_FLAGS) paleboot.c -o PaleBoot -DVERSION=\"1.0-paleboot1\"
