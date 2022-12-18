@@ -144,6 +144,11 @@ int main() {
 
     irecv_client_t client = get_client();
 
+    irecv_device_t device = NULL;
+	irecv_devices_get_device_by_client(client, &device);
+
+    printf("Hi %x (%s)", device->chip_id, device->product_type);
+
     if (has_ibss) {
         if (send_file(client, "./boot/iBSS.img4") != 0) {
             printf("Failed to send iBSS!\n");
@@ -227,6 +232,8 @@ int main() {
         printf("Failed to fsboot!\n");
         return 1;
     }
+
+    irecv_close(client);
      
     return 0;
 }
