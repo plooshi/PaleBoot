@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <libirecovery.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 void print_progress_bar(double progress) {
 	int i = 0;
@@ -148,6 +149,7 @@ int main() {
 	irecv_devices_get_device_by_client(client, &device);
 
     printf("Hi %x (%s)", device->chip_id, device->product_type);
+    exit(0);
 
     if (has_ibss) {
         if (send_file(client, "./boot/iBSS.img4") != 0) {
