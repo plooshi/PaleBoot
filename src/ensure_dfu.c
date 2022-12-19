@@ -1,0 +1,133 @@
+// built in
+#include <device_detection.h>
+#include <get_udid.h>
+#include <utils.h>
+#include <ensure_dfu.h>
+
+// deps
+#include <libimobiledevice/libimobiledevice.h>
+#include <libimobiledevice/lockdown.h>
+
+// std c library
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+
+bool enter_recovery(char *udid) {
+    idevice_error_t ret = IDEVICE_E_UNKNOWN_ERROR;
+    idevice_t device = NULL;
+    lockdownd_error_t ldret = LOCKDOWN_E_UNKNOWN_ERROR;
+    lockdownd_client_t client = NULL;
+    bool res = true;
+
+    ret = idevice_new(&device, udid);
+    if (ret != IDEVICE_E_SUCCESS) {
+        printf("Unable to connect to device!\n");
+        return false;
+    }
+
+    if (LOCKDOWN_E_SUCCESS != (ldret = lockdownd_client_new(device, &client, "PaleBoot"))) {
+        printf("Could not connect to lockdownd: %s (%d)\n", lockdownd_strerror(ldret), ldret);
+        idevice_free(device);
+        return false;
+    }
+
+    printf("Sending device into recovery mode.\n");
+    ldret = lockdownd_enter_recovery(client);
+	if (ldret == LOCKDOWN_E_SESSION_INACTIVE) {
+		lockdownd_client_free(client);
+		client = NULL;
+		if (LOCKDOWN_E_SUCCESS != (ldret = lockdownd_client_new_with_handshake(device, &client, "PaleBoot"))) {
+			printf("Could not connect to lockdownd: %s (%d)\n", lockdownd_strerror(ldret), ldret);
+			idevice_free(device);
+			return false;
+		}
+		ldret = lockdownd_enter_recovery(client);
+	}
+	if (ldret != LOCKDOWN_E_SUCCESS) {
+		printf("Failed to enter recovery mode!\n");
+		res = false;
+	} else {
+		printf("Device is now going into recovery mode.\n");
+	}
+
+    lockdownd_client_free(client);
+	idevice_free(device);
+
+    return res;
+}
+
+void step(int time, char *text) {
+    for (int i = 0; i < time; i++) {
+        printf("\r\e[K\e[1;36m%s (%d)", text, time);
+        sleep(1);
+    }
+    printf("\n");
+}
+
+bool dfuhelper(unsigned int cpid, const char *product_type) {
+    char *step_one, *step_two;
+
+    if ((cpid == 0x8010 || cpid == 0x8015) && !startswith(product_type, "iPad")) {
+        step_one = "Hold volume down + side button";
+    } else {
+        step_one = "Hold home + power button";
+    }
+    printf("Press any key when ready for DFU mode\n");
+    getchar();
+    step(3, "Get ready");
+    step(2, step_one);
+    if (run_command("reset") != 0) {
+        printf("Failed to reset!\n");
+        return false;
+    }
+    step(3, "Keep holding");
+    
+    if ((cpid == 0x8010 || cpid == 0x8015) && !startswith(product_type, "iPad")) {
+        step(10, "Release side button, but keep holding volume down");
+    } else {
+        step(10, "Release power button, but keep holding home button");
+    }
+
+    if (ensure_dfu()) {
+        printf("Device successfully entered DFU mode!\n");
+        return true;
+    } else {
+        printf("Device did not enter DFU mode, please run PaleBoot again.\n");
+        return false;
+    }
+}
+
+bool ensure_dfu() {
+    const char *device_mode = get_device_mode();
+
+    if (strcmp(device_mode, "too_many") == 0) {
+        printf("More than once device detected! Please have only the device you would like to boot plugged in.\n");
+        return false;
+    } else if (strcmp(device_mode, "normal") == 0) {
+        char *udid;
+
+        get_udid(udid);
+
+        if (strcmp(udid, "error") == 0) {
+            printf("Failed to get udid!\n");
+            return false;
+        }
+
+        if (!enter_recovery(udid)) return false;
+
+        printf("Waiting for device in recovery mode.\n");
+        return ensure_dfu();
+    } else if (strcmp(device_mode, "recovery") == 0) {
+        irecv_client_t client = get_client();
+        irecv_device_t device = NULL;
+	    irecv_devices_get_device_by_client(client, &device);
+
+        return dfuhelper(device->chip_id, device->product_type);
+    } else if (strcmp(device_mode, "dfu") == 0) {
+        return true;
+    }
+
+    return false;
+}
