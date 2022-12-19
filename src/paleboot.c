@@ -1,5 +1,6 @@
 // built in
 #include <gaster.h>
+#include <ensure_dfu.h>
 
 // deps
 #include <libirecovery.h>
@@ -25,6 +26,8 @@ int main(int argc, char **argv) {
         printf("Couldn't find iBoot!\n");
         return 1;
     }
+
+    ensure_dfu();
 
     usb_handle_t handle;
 
