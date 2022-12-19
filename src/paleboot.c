@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
         sleep(3);
 
         if (run_command("go") != 0) {
-            printf("Failed to run boot payload!\n");
+            printf("Failed to boot payload!\n");
             return 1;
         };
 
