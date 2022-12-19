@@ -62,7 +62,7 @@ bool enter_recovery(char *udid) {
 
 void step(int time, char *text) {
     for (int i = 0; i < time; i++) {
-        printf("\r\e[K\e[1;36m%s (%d)", text, time);
+        printf("\r\e[K\e[1;36m%s (%d)", text, i);
         sleep(1);
     }
     printf("\n");
