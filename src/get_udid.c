@@ -12,7 +12,7 @@ void get_udid(char **_udid) {
 
     ret = idevice_new_with_options(&device, udid, IDEVICE_LOOKUP_USBMUX);
     if (ret != IDEVICE_E_SUCCESS) {
-		_udid = "error";
+		*_udid = "error";
 	}
 
     char actual_udid[64] = "";
