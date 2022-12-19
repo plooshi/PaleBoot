@@ -25,4 +25,4 @@ gaster:
 	make -f gaster.mk -C deps/gaster
 
 paleboot:
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(LIBDIRS) $(INCLDIRS) $(USBLIB_FLAGS) paleboot.c $(GASTER_FILES) -o PaleBoot -DVERSION=\"1.0-paleboot1\"
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBS) $(LIBDIRS) $(INCLDIRS) $(USBLIB_FLAGS) src/paleboot.c $(GASTER_FILES) -o ./PaleBoot -DVERSION=\"1.0-paleboot1\"
