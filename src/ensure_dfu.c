@@ -4,6 +4,7 @@
 #include <utils.h>
 #include <ensure_dfu.h>
 #include <usb.h>
+#include <wait_device.h>
 
 // deps
 #include <libimobiledevice/libimobiledevice.h>
