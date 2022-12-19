@@ -93,17 +93,17 @@ int run_command(irecv_client_t client, const char *command) {
     return 0;
 }
 
-int main() {
-    bool has_ibss = false, has_t8010 = false, has_t8015 = false;
+int main(int argc, char **argv) {
     FILE *fs_file;
     char fs[9] = "";
+    bool semi_tethered = argc > 2 && strcmp(argv[2], "--tethered") != 0;
 
-    if (file_doesnt_exist("./boot")) {
+    if (!file_exists("./boot")) {
         printf("Couldn't find boot directory!\n");
         return 1;
     }
 
-    if (file_doesnt_exist("./boot/ibot.img4")) {
+    if (!file_exists("./boot/ibot.img4")) {
         printf("Couldn't find iBoot!\n");
         return 1;
     }
@@ -129,7 +129,7 @@ int main() {
 
 
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
-        if (file_doesnt_exist("./boot/iBSS.img4")) {
+        if (!file_exists("./boot/iBSS.img4")) {
             printf("Could not find iBSS!\n");
             return 1;
         } else {
@@ -143,7 +143,7 @@ int main() {
         }
     }
 
-    bool do_hb_patch = startswith("iPhone9,", device->product_type) || (startswith("iPhone10,", device->product_type) && 
+    bool do_hb_patch = semi_tethered && startswith("iPhone9,", device->product_type) || (startswith("iPhone10,", device->product_type) && 
         doesnt_startwith("iPhone10,3", device->product_type) && doesnt_startwith("iPhone10,6", device->product_type));
 
     sleep(1);
@@ -167,10 +167,11 @@ int main() {
         if (strcmp(payload_path, "not.found")) {
             printf("PaleBoot detected your device needs payload, but we could not find it in the boot folder.\n");
             printf("Please copy the correct payload for your device from other/payload in your palera1n folder to the boot folder.\n");
+            printf("If using tethered, please add --tethered to the end of the command\n");
             return 1;
         }
 
-        if (file_doesnt_exist("./boot/.fs")) {
+        if (!file_exists("./boot/.fs")) {
             printf("Couldn't find boot/.fs!\n");
             return 1;
         } else {
@@ -228,10 +229,11 @@ int main() {
     
     sleep(2);
 
-    int fsboot_ret = run_command(client, "fsboot");
-    if (fsboot_ret != 0 && fsboot_ret != -1) {
-        printf("Failed to fsboot!\n");
-        return 1;
+    if (!semi_tethered) {
+        if (run_command(client, "fsboot") != 0) {
+            printf("Failed to fsboot!\n");
+            return 1;
+        }
     }
 
     irecv_close(client);
