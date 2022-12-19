@@ -68,7 +68,7 @@ void step(int time, char *text) {
     printf("\n");
 }
 
-bool dfuhelper(unsigned int cpid, const char *product_type) {
+bool dfuhelper(unsigned int cpid, char *product_type) {
     char *step_one, *step_two;
 
     if ((cpid == 0x8010 || cpid == 0x8015) && !startswith(product_type, "iPad")) {
