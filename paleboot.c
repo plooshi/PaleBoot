@@ -76,6 +76,7 @@ int send_file(irecv_client_t client, const char *filename) {
 	irecv_error_t error = irecv_send_file(client, filename, 1);
     if (error != 0) {
 	    printf("%s\n", irecv_strerror(error));
+        irecv_close(client);
         return error;
     }
     return 0;
@@ -85,6 +86,7 @@ int run_command(irecv_client_t client, const char *command) {
     irecv_error_t error = irecv_send_command(client, command);
     if (error != 0) {
 	    printf("%s\n", irecv_strerror(error));
+        irecv_close(client);
         return error;
     }
     return 0;
@@ -128,14 +130,15 @@ int main(int argc, char **argv) {
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
         if (!file_exists("./boot/iBSS.img4")) {
             printf("Could not find iBSS!\n");
+            irecv_close(client);
             return 1;
         } else {
             if (send_file(client, "./boot/iBSS.img4") != 0) {
                 printf("Failed to send iBSS!\n");
                 return 1;
             }
+
             sleep(3);
-            
             client = get_client();
         }
     }
@@ -147,17 +150,19 @@ int main(int argc, char **argv) {
     if (send_file(client, "./boot/ibot.img4") != 0) {
         printf("Failed to send iBoot!\n");
         return 1;
+    } else {
+        if (!do_hb_patch) {
+            printf("Successfully booted device!\n");
+            irecv_close(client);
+            return 0;
+        }
     }
 
     char payload_path[25] = "not.found";
     if (do_hb_patch) {
         if (file_exists("./boot/payload_t8010.bin")) {
-            printf("Found payload (A10).\n");
             strcpy(payload_path, "./boot/payload_t8010.bin");
-        }
-
-        if (file_exists("./boot/payload_t8015.bin")) {
-            printf("Found payload (A11).\n");
+        } else if (file_exists("./boot/payload_t8015.bin")) {
             strcpy(payload_path, "./boot/payload_t8015.bin");
         }
         
@@ -165,6 +170,7 @@ int main(int argc, char **argv) {
             printf("PaleBoot detected your device needs payload, but we could not find it in the boot folder.\n");
             printf("Please copy the correct payload for your device from other/payload in your palera1n folder to the boot folder.\n");
             printf("If using tethered, please add --tethered to the end of the command\n");
+            irecv_close(client);
             return 1;
         }
 
@@ -177,40 +183,47 @@ int main(int argc, char **argv) {
             fclose(fs_file);
         }
 
-        client = get_client();
-
         sleep(3);
-        run_command(client, "dorwx");
-
         client = get_client();
+
+        if (run_command(client, "dorwx") != 0) {
+            printf("Failed to run dorwx!\n");
+            return 1;
+        }
 
         sleep(2);
+        client = get_client();
+
+        
         if (send_file(client, payload_path) != 0) {
             printf("Failed to send payload!\n");
             return 1;
         }
 
+        sleep(3);
         client = get_client();
 
-        sleep(3);
         if (run_command(client, "go") != 0) {
-            printf("Failed to run go!\n");
+            printf("Failed to run boot payload!\n");
             return 1;
         };
+
         sleep(1);
         client = get_client();
 
         if (run_command(client, "go xargs -v serial=3") != 0) {
             printf("Failed to set boot args!\n");
             return 1;
-        };
+        }
+
         sleep(1);
         client = get_client();
 
         if (run_command(client, "go xfb") != 0) {
             printf("Failed to init framebuffer!\n");
             return 1;
-        };
+        }
+
         sleep(1);
         client = get_client();
 
@@ -219,9 +232,11 @@ int main(int argc, char **argv) {
         if (run_command(client, boot_command) != 0) {
             printf("Failed to boot!\n");
             return 1;
+        } else {
+            printf("Successfully booted device!\n");
+            irecv_close(client);
+            return 0;
         }
-        
-        client = get_client();
     }
     
     sleep(2);
@@ -230,10 +245,12 @@ int main(int argc, char **argv) {
         if (run_command(client, "fsboot") != 0) {
             printf("Failed to fsboot!\n");
             return 1;
+        } else {
+            printf("Successfully booted device!\n");
+            irecv_close(client);
+            return 0;
         }
     }
-
-    irecv_close(client);
      
     return 0;
 }

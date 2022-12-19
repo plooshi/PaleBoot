@@ -1,6 +1,6 @@
 #ifndef _GASTER_H
 #define _GASTER_H
-#if defined(_WIN32) || defined(__linux__)
+#if defined(HAVE_LIBUSB) || defined(_WIN32) || defined(__linux__)
 #include <libusb-1.0/libusb.h>
 #endif
 #include <stdbool.h>
