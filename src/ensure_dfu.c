@@ -108,7 +108,7 @@ bool ensure_dfu() {
     } else if (strcmp(device_mode, "normal") == 0) {
         char *udid;
 
-        get_udid(udid);
+        get_udid(&udid);
 
         if (strcmp(udid, "error") == 0) {
             printf("Failed to get udid!\n");

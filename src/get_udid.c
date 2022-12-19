@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void get_udid(char *_udid) {
+void get_udid(char **_udid) {
 	idevice_t device = NULL;
 	idevice_error_t ret = IDEVICE_E_UNKNOWN_ERROR;
     const char* udid = NULL;
@@ -21,5 +21,5 @@ void get_udid(char *_udid) {
     free(real_udid);
 
 	idevice_free(device);
-    _udid = actual_udid;
+    *_udid = actual_udid;
 }
