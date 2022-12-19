@@ -16,7 +16,7 @@ const char *get_device_mode() {
         // dfu mode
         {0x05ac, 0x1227}
     };
-    int found_count = wait_usb_handles(found_targets, targets, sizeof(targets) / sizeof(targets[0]));
+    int found_count = wait_usb_handles(&found_targets, targets, sizeof(targets) / sizeof(targets[0]));
     if (found_count > 1) {
         return "too_many";
     }

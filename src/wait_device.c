@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #ifdef USE_LIBUSB
-int wait_usb_handles(usb_handle_t *found_targets, int targets[][2], unsigned int target_count) {
+int wait_usb_handles(usb_handle_t **found_targets, int targets[][2], unsigned int target_count) {
     libusb_device **list;
     libusb_context *context;
     usb_handle_t found_targets_big[1024];
@@ -45,11 +45,11 @@ int wait_usb_handles(usb_handle_t *found_targets, int targets[][2], unsigned int
         found_targets_out[i] = found_targets_big[i];
     }
     
-    found_targets = found_targets_out;
+    *found_targets = found_targets_out;
     return found_count;
 }
 #else
-int wait_usb_handles(usb_handle_t *found_targets, int targets[][2], unsigned int target_count) {
+int wait_usb_handles(usb_handle_t **found_targets, int targets[][2], unsigned int target_count) {
     CFMutableDictionaryRef matching_dict;
     io_iterator_t iter;
     io_service_t serv;
@@ -93,7 +93,7 @@ int wait_usb_handles(usb_handle_t *found_targets, int targets[][2], unsigned int
         found_targets_out[i] = found_targets_big[i];
     }
     
-    found_targets = found_targets_out;
+    *found_targets = found_targets_out;
     return found_count;
 }
 #endif
