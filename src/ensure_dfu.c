@@ -71,7 +71,7 @@ void step(int time, char *text) {
 bool dfuhelper(unsigned int cpid, char *product_type) {
     char *step_one, *step_two;
 
-    if ((cpid == 0x8010 || cpid == 0x8015) && !startswith(product_type, "iPad")) {
+    if ((cpid == 0x8010 || cpid == 0x8015) && strstr(product_type, "iPad") != product_type) {
         step_one = "Hold volume down + side button";
     } else {
         step_one = "Hold home + power button";
@@ -86,7 +86,7 @@ bool dfuhelper(unsigned int cpid, char *product_type) {
     }
     step(3, "Keep holding");
     
-    if ((cpid == 0x8010 || cpid == 0x8015) && !startswith(product_type, "iPad")) {
+    if ((cpid == 0x8010 || cpid == 0x8015) && strstr(product_type, "iPad") != product_type) {
         step(10, "Release side button, but keep holding volume down");
     } else {
         step(10, "Release power button, but keep holding home button");
