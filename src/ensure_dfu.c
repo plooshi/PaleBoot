@@ -108,7 +108,7 @@ bool wait_recovery() {
     };
     wait_usb_handles(&found_targets, targets, sizeof(targets) / sizeof(targets[0]));
 
-    ensure_dfu();
+    return ensure_dfu();
 }
 
 bool ensure_dfu() {
