@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
         printf("Failed to send iBoot!\n");
         return 1;
     } else {
-        if (!do_hb_patch) {
+        if (!do_hb_patch || semi_tethered) {
             printf("Successfully booted device!\n");
             irecv_close(client);
             return 0;
