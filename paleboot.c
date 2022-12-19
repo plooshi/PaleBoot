@@ -5,10 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define file_exists(file) (access(file, F_OK)) != -1
-#define file_doesnt_exist(file) !(file_exists(file))
-#define startswith(string, substr) strcmp(strstr(substr, string), string) == 0
-#define doesnt_startwith(string, substr) !(startswith(string, substr))
+#define file_exists(file) ((access(file, F_OK)) != -1)
+#define startswith(string, substr) (strcmp(strstr(substr, string), string) == 0)
 
 void print_progress_bar(double progress) {
 	int i = 0;
@@ -74,7 +72,6 @@ irecv_client_t get_client() {
 }
 
 int send_file(irecv_client_t client, const char *filename) {
-
     irecv_event_subscribe(client, IRECV_PROGRESS, &progress_cb, NULL);
 	irecv_error_t error = irecv_send_file(client, filename, 1);
     if (error != 0) {
@@ -144,7 +141,7 @@ int main(int argc, char **argv) {
     }
 
     bool do_hb_patch = semi_tethered && startswith("iPhone9,", device->product_type) || (startswith("iPhone10,", device->product_type) && 
-        doesnt_startwith("iPhone10,3", device->product_type) && doesnt_startwith("iPhone10,6", device->product_type));
+        !startswith("iPhone10,3", device->product_type) && !startswith("iPhone10,6", device->product_type));
 
     sleep(1);
     if (send_file(client, "./boot/ibot.img4") != 0) {
