@@ -9,5 +9,6 @@
 #include <IOKit/IOCFPlugIn.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <CommonCrypto/CommonCrypto.h>
+
 #endif /* defined(HAVE_LIBUSB) || defined(_WIN32) || defined(__linux__) */
 #endif /* _USB_H */
