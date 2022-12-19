@@ -3,6 +3,7 @@
 #include <get_udid.h>
 #include <utils.h>
 #include <ensure_dfu.h>
+#include <usb.h>
 
 // deps
 #include <libimobiledevice/libimobiledevice.h>
@@ -99,6 +100,16 @@ bool dfuhelper(unsigned int cpid, const char *product_type) {
     }
 }
 
+bool wait_recovery() {
+    usb_handle_t *found_targets;
+    int targets[][2] = {
+        {0x05ac, 0x1281}
+    };
+    wait_usb_handles(&found_targets, targets, sizeof(targets) / sizeof(targets[0]));
+
+    ensure_dfu();
+}
+
 bool ensure_dfu() {
     const char *device_mode = get_device_mode();
 
@@ -118,7 +129,7 @@ bool ensure_dfu() {
         if (!enter_recovery(udid)) return false;
 
         printf("Waiting for device in recovery mode.\n");
-        return ensure_dfu();
+        return wait_recovery();
     } else if (strcmp(device_mode, "recovery") == 0) {
         irecv_client_t client = get_client();
         irecv_device_t device = NULL;
