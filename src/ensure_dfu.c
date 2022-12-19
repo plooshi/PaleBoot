@@ -136,7 +136,7 @@ bool ensure_dfu() {
         irecv_device_t device = NULL;
 	    irecv_devices_get_device_by_client(client, &device);
 
-        return dfuhelper(device->chip_id, device->product_type);
+        return dfuhelper(device->chip_id, (char *)device->product_type);
     } else if (strcmp(device_mode, "dfu") == 0) {
         return true;
     }
