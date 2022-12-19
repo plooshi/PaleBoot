@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define file_exists(file) (access(file, F_OK)) != -1
+#define file_doesnt_exist(file) !(file_exists(file))
+#define startswith(string, substr) strcmp(strstr(substr, string), string) == 0
+#define doesnt_startwith(string, substr) !(startswith(string, substr))
+
 void print_progress_bar(double progress) {
 	int i = 0;
 
@@ -93,12 +98,12 @@ int main() {
     FILE *fs_file;
     char fs[9] = "";
 
-    if (access("./boot", F_OK) != 0) {
+    if (file_doesnt_exist("./boot")) {
         printf("Couldn't find boot directory!\n");
         return 1;
     }
 
-    if (access("./boot/ibot.img4", F_OK) != 0) {
+    if (file_doesnt_exist("./boot/ibot.img4")) {
         printf("Couldn't find iBoot!\n");
         return 1;
     }
@@ -124,7 +129,7 @@ int main() {
 
 
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
-        if (access("./boot/iBSS.img4", F_OK) != 0) {
+        if (file_doesnt_exist("./boot/iBSS.img4")) {
             printf("Could not find iBSS!\n");
             return 1;
         } else {
@@ -138,9 +143,8 @@ int main() {
         }
     }
 
-    bool do_hb_patch = strstr("iPhone9,", device->product_type) == device->product_type || 
-        (strstr("iPhone10,", device->product_type) == device->product_type && strstr("iPhone10,3", device->product_type) != device->product_type &&
-        strstr("iPhone10,6", device->product_type) != device->product_type);
+    bool do_hb_patch = startswith("iPhone9,", device->product_type) || (startswith("iPhone10,", device->product_type) && 
+        doesnt_startwith("iPhone10,3", device->product_type) && doesnt_startwith("iPhone10,6", device->product_type));
 
     sleep(1);
     if (send_file(client, "./boot/ibot.img4") != 0) {
@@ -150,12 +154,12 @@ int main() {
 
     char payload_path[25] = "not.found";
     if (do_hb_patch) {
-        if (access("./boot/payload_t8010.bin", F_OK) == 0) {
+        if (file_exists("./boot/payload_t8010.bin")) {
             printf("Found payload (A10).\n");
             strcpy(payload_path, "./boot/payload_t8010.bin");
         }
 
-        if (access("./boot/payload_t8015.bin", F_OK) == 0) {
+        if (file_exists("./boot/payload_t8015.bin")) {
             printf("Found payload (A11).\n");
             strcpy(payload_path, "./boot/payload_t8015.bin");
         }
@@ -166,7 +170,7 @@ int main() {
             return 1;
         }
 
-        if (access("./boot/.fs", F_OK) != 0) {
+        if (file_doesnt_exist("./boot/.fs")) {
             printf("Couldn't find boot/.fs!\n");
             return 1;
         } else {
