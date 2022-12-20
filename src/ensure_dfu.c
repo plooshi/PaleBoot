@@ -106,22 +106,6 @@ bool wait_recovery(semi_tethered) {
     };
     wait_usb_handles(&found_targets, targets, sizeof(targets) / sizeof(targets[0]));
 
-    irecv_client_t client = get_client();
-
-    if (!semi_tethered) {
-        if (set_env("auto-boot", "false") != 0) {
-            printf("Failed to fix auto boot value!\n");
-            return 1;
-        }
-    } else {
-        if (set_env("auto-boot", "true") != 0) {
-            printf("Failed to fix auto boot value!\n");
-            return 1;
-        }
-    }
-
-    irecv_close(client);
-
     return ensure_dfu(semi_tethered);
 }
 
