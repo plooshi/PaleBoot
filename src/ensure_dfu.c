@@ -82,9 +82,9 @@ bool dfuhelper(unsigned int cpid, char *product_type) {
     printf("Press any key when ready for DFU mode\n");
     getchar();
     step(3, "Get ready");
-    step(2, step_one);
+    step(3, step_one);
     run_command("reset");
-    step(3, "Keep holding");
+    step(2, "Keep holding");
     
     if ((cpid == 0x8010 || cpid == 0x8015) && strstr(product_type, "iPad") != product_type) {
         step(10, "Release side button, but keep holding volume down");
