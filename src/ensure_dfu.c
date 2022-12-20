@@ -109,12 +109,12 @@ bool wait_recovery(semi_tethered) {
     irecv_client_t client = get_client();
 
     if (!semi_tethered) {
-        if (set_env(client, "auto-boot", "false") != 0) {
+        if (set_env("auto-boot", "false") != 0) {
             printf("Failed to fix auto boot value!\n");
             return 1;
         }
     } else {
-        if (set_env(client, "auto-boot", "true") != 0) {
+        if (set_env("auto-boot", "true") != 0) {
             printf("Failed to fix auto boot value!\n");
             return 1;
         }
@@ -168,7 +168,7 @@ bool ensure_dfu(bool semi_tethered) {
         }
 
 
-        return dfuhelper(device->chip_id, (char *)device->product_type, semi_tethered);
+        return dfuhelper(cpid, product, semi_tethered);
     } else if (strcmp(device_mode, "dfu") == 0) {
         return true;
     }
