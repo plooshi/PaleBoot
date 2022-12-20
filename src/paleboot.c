@@ -48,6 +48,18 @@ int main(int argc, char **argv) {
     irecv_device_t device = NULL;
 	irecv_devices_get_device_by_client(client, &device);
 
+    if (!semi_tethered) {
+        if (set_env("auto-boot", "false") != 0) {
+            printf("Failed to fix auto boot value!\n");
+            return 1;
+        }
+    } else {
+        if (set_env("auto-boot", "true") != 0) {
+            printf("Failed to fix auto boot value!\n");
+            return 1;
+        }
+    }
+
     irecv_close(client);
 
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {

@@ -87,3 +87,19 @@ int run_command(const char *command) {
     }
     return 0;
 }
+
+int set_env(const char *key, const char *value) {
+	irecv_client_t client = get_client();
+    irecv_error_t error = irecv_setenv(client, key, value);
+    irecv_close(client);
+    if (error != 0) {
+	    printf("%s\n", irecv_strerror(error));
+        return error;
+    }
+	error = irecv_saveenv(client);
+	if (error != 0) {
+	    printf("%s\n", irecv_strerror(error));
+        return error;
+    }
+    return 0;
+}
