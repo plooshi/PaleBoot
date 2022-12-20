@@ -88,15 +88,25 @@ int run_command(const char *command) {
     return 0;
 }
 
-int set_env(const char *key, const char *value) {
+int run_command_existing_client(irecv_client_t client, const char *command) {
+    irecv_error_t error = irecv_send_command(client, command);
+    irecv_close(client);
+    if (error != 0) {
+	    printf("%s\n", irecv_strerror(error));
+        return error;
+    }
+    return 0;
+}
+
+int set_env(irecv_client_t client, const char *key, const char *value) {
 	char setenv_cmd[1024] = "";
 	sprintf(setenv_cmd, "setenv %s %s", key, value);
-	int ret = run_command(setenv_cmd);
+	int ret = run_command_existing_client(client, setenv_cmd);
 	if (ret != 0) {
 		printf("%s\n", irecv_strerror(ret));
 		return ret;
 	}
-	ret = run_command("saveenv");
+	ret = run_command_existing_client(client, "saveenv");
 	if (ret != 0) {
 	    printf("%s\n", irecv_strerror(ret));
         return ret;

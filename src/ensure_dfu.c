@@ -135,12 +135,12 @@ bool ensure_dfu(bool semi_tethered) {
 	    irecv_devices_get_device_by_client(client, &device);
 
         if (!semi_tethered) {
-            if (set_env("auto-boot", "false") != 0) {
+            if (set_env(client, "auto-boot", "false") != 0) {
                 printf("Failed to fix auto boot value!\n");
                 return 1;
             }
         } else {
-            if (set_env("auto-boot", "true") != 0) {
+            if (set_env(client, "auto-boot", "true") != 0) {
                 printf("Failed to fix auto boot value!\n");
                 return 1;
             }

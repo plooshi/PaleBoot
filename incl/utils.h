@@ -7,7 +7,7 @@
 irecv_client_t get_client();
 int send_file(const char *filename);
 int run_command(const char *command);
-int set_env(const char *key, const char *value);
+int set_env(irecv_client_t client, const char *key, const char *value);
 
 #define file_exists(file) ((access(file, F_OK)) != -1)
 
