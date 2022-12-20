@@ -66,9 +66,9 @@ void step(int time, char *text) {
         printf("\r%s (%d)", text, time - i);
         fflush(stdout);
 
-        sleep_ms(950);
+        sleep(1);
     }
-    printf("\n");
+    printf("\r%s (%d)\n", text, 0);
 }
 
 bool dfuhelper(unsigned int cpid, char *product_type) {
@@ -82,9 +82,7 @@ bool dfuhelper(unsigned int cpid, char *product_type) {
     printf("Press any key when ready for DFU mode\n");
     getchar();
     step(3, "Get ready");
-    step(3, step_one);
-    run_command("reset");
-    step(2, "Keep holding");
+    step(10, step_one);
     
     if ((cpid == 0x8010 || cpid == 0x8015) && strstr(product_type, "iPad") != product_type) {
         step(10, "Release side button, but keep holding volume down");
