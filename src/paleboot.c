@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    ensure_dfu();
+    ensure_dfu(semi_tethered);
 
     usb_handle_t handle;
 
@@ -47,18 +47,6 @@ int main(int argc, char **argv) {
 
     irecv_device_t device = NULL;
 	irecv_devices_get_device_by_client(client, &device);
-
-    if (!semi_tethered) {
-        if (set_env("auto-boot", "false") != 0) {
-            printf("Failed to fix auto boot value!\n");
-            return 1;
-        }
-    } else {
-        if (set_env("auto-boot", "true") != 0) {
-            printf("Failed to fix auto boot value!\n");
-            return 1;
-        }
-    }
 
     irecv_close(client);
 

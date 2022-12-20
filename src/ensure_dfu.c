@@ -109,7 +109,7 @@ bool wait_recovery() {
     return ensure_dfu();
 }
 
-bool ensure_dfu() {
+bool ensure_dfu(bool semi_tethered) {
     const char *device_mode = get_device_mode();
 
     if (strcmp(device_mode, "too_many") == 0) {
@@ -133,6 +133,19 @@ bool ensure_dfu() {
         irecv_client_t client = get_client();
         irecv_device_t device = NULL;
 	    irecv_devices_get_device_by_client(client, &device);
+
+        if (!semi_tethered) {
+            if (set_env("auto-boot", "false") != 0) {
+                printf("Failed to fix auto boot value!\n");
+                return 1;
+            }
+        } else {
+            if (set_env("auto-boot", "true") != 0) {
+                printf("Failed to fix auto boot value!\n");
+                return 1;
+            }
+        }
+
 
         return dfuhelper(device->chip_id, (char *)device->product_type);
     } else if (strcmp(device_mode, "dfu") == 0) {
