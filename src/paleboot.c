@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    bool do_hb_patch = semi_tethered && startswith("iPhone9,", device->product_type) || (startswith("iPhone10,", device->product_type) && 
-        !startswith("iPhone10,3", device->product_type) && !startswith("iPhone10,6", device->product_type));
+    bool do_hb_patch = semi_tethered && strstr("iPhone9,", device->product_type) == device->product_type || 
+        strstr("iPhone10,", device->product_type) == device->product_type;
 
     sleep(1);
     if (send_file("./boot/ibot.img4") != 0) {
