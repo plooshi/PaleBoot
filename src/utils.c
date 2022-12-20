@@ -90,7 +90,6 @@ int run_command(const char *command) {
 
 int run_command_existing_client(irecv_client_t client, const char *command) {
     irecv_error_t error = irecv_send_command(client, command);
-    irecv_close(client);
     if (error != 0) {
 	    printf("%s\n", irecv_strerror(error));
         return error;
