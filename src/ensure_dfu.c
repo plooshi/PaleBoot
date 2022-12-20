@@ -63,7 +63,7 @@ bool enter_recovery(char *udid) {
 
 void step(int time, char *text) {
     for (int i = 0; i < time; i++) {
-        printf("\r%s (%d)", text, time - i);
+        printf("\r\e[K%s (%d)", text, time - i);
         fflush(stdout);
 
         sleep(1);
@@ -158,12 +158,10 @@ bool ensure_dfu(bool semi_tethered) {
         if (!semi_tethered) {
             if (set_env("auto-boot", "false") != 0) {
                 printf("Failed to fix auto boot value!\n");
-                return 1;
             }
         } else {
             if (set_env("auto-boot", "true") != 0) {
                 printf("Failed to fix auto boot value!\n");
-                return 1;
             }
         }
 
