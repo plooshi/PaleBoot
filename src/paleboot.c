@@ -15,7 +15,12 @@
 int main(int argc, char **argv) {
     FILE *fs_file;
     char fs[9] = "";
-    bool semi_tethered = argc > 2 && strcmp(argv[2], "--tethered") != 0;
+    bool semi_tethered;
+    if (argc > 2) {
+        semi_tethered = strcmp(argv[2], "--tethered") != 0;
+    } else {
+        semi_tethered = true;
+    }
 
     if (!file_exists("./boot")) {
         printf("Couldn't find boot directory!\n");
