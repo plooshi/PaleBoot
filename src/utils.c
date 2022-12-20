@@ -88,7 +88,7 @@ int run_command(const char *command) {
     return 0;
 }
 
-int set_env(irecv_client_t client, const char *key, const char *value) {
+int set_env(const char *key, const char *value) {
 	char setenv_cmd[1024] = "";
 	sprintf(setenv_cmd, "setenv %s %s", key, value);
 	if (run_command(setenv_cmd) != 0) {
