@@ -63,9 +63,9 @@ bool enter_recovery(char *udid) {
 
 void step(int time, char *text) {
     for (int i = 0; i < time; i++) {
-        printf("%s (%d)", text, time - i);
+        printf("\r%s (%d)", text, time - i);
         fflush(stdout);
-        
+
         sleep_ms(950);
     }
     printf("\n");
