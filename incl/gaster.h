@@ -10,6 +10,7 @@
 bool gaster_checkm8(usb_handle_t *handle);
 bool gaster_reset(usb_handle_t *handle);
 void init_usb_handle(usb_handle_t *handle, uint16_t vid, uint16_t pid);
+void sleep_ms(unsigned ms);
 
 #ifdef USE_IOKIT
 

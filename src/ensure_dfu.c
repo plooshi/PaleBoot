@@ -5,6 +5,7 @@
 #include <ensure_dfu.h>
 #include <usb.h>
 #include <wait_device.h>
+#include <gaster.h>
 
 // deps
 #include <libimobiledevice/libimobiledevice.h>
@@ -62,8 +63,8 @@ bool enter_recovery(char *udid) {
 
 void step(int time, char *text) {
     for (int i = 0; i < time; i++) {
-        printf("\r\e[K\e[1;36m%s (%d)", text, i);
-        sleep(1);
+        printf("%s (%d)", text, i);
+        sleep_ms(950);
     }
     printf("\n");
 }
@@ -80,10 +81,7 @@ bool dfuhelper(unsigned int cpid, char *product_type) {
     getchar();
     step(3, "Get ready");
     step(2, step_one);
-    if (run_command("reset") != 0) {
-        printf("Failed to reset!\n");
-        return false;
-    }
+    run_command("reset");
     step(3, "Keep holding");
     
     if ((cpid == 0x8010 || cpid == 0x8015) && strstr(product_type, "iPad") != product_type) {
