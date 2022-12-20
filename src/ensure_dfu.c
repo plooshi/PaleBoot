@@ -71,7 +71,7 @@ void step(int time, char *text) {
     printf("\r%s (%d)\n", text, 0);
 }
 
-bool dfuhelper(unsigned int cpid, char *product_type) {
+bool dfuhelper(unsigned int cpid, char *product_type, bool semi_tethered) {
     char *step_one, *step_two;
 
     if ((cpid == 0x8010 || cpid == 0x8015) && strstr(product_type, "iPad") != product_type) {
@@ -90,7 +90,7 @@ bool dfuhelper(unsigned int cpid, char *product_type) {
         step(10, "Release power button, but keep holding home button");
     }
 
-    if (ensure_dfu()) {
+    if (ensure_dfu(semi_tethered)) {
         printf("Device successfully entered DFU mode!\n");
         return true;
     } else {
@@ -99,14 +99,14 @@ bool dfuhelper(unsigned int cpid, char *product_type) {
     }
 }
 
-bool wait_recovery() {
+bool wait_recovery(semi_tethered) {
     usb_handle_t *found_targets;
     int targets[][2] = {
         {0x05ac, 0x1281}
     };
     wait_usb_handles(&found_targets, targets, sizeof(targets) / sizeof(targets[0]));
 
-    return ensure_dfu();
+    return ensure_dfu(semi_tethered);
 }
 
 bool ensure_dfu(bool semi_tethered) {
@@ -128,7 +128,7 @@ bool ensure_dfu(bool semi_tethered) {
         if (!enter_recovery(udid)) return false;
 
         printf("Waiting for device in recovery mode.\n");
-        return wait_recovery();
+        return wait_recovery(semi_tethered);
     } else if (strcmp(device_mode, "recovery") == 0) {
         irecv_client_t client = get_client();
         irecv_device_t device = NULL;
@@ -147,7 +147,7 @@ bool ensure_dfu(bool semi_tethered) {
         }
 
 
-        return dfuhelper(device->chip_id, (char *)device->product_type);
+        return dfuhelper(device->chip_id, (char *)device->product_type, semi_tethered);
     } else if (strcmp(device_mode, "dfu") == 0) {
         return true;
     }
