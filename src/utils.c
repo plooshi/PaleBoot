@@ -1,6 +1,7 @@
 #include <utils.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 void print_progress_bar(double progress) {
 	int i = 0;
@@ -98,4 +99,23 @@ int set_env(const char *key, const char *value) {
         return 1;
     }
     return 0;
+}
+
+void gc(char **ptr, FILE *fp) {
+    int c;
+	char str[1000000] = "";
+
+    while ((c = fgetc(fp)) != EOF) {
+		if (c != '\0') {
+        	sprintf(str + strlen(str), "%c", c);
+		}
+    }
+
+	*ptr = str;
+}
+
+void read_all(char **ptr, FILE *fp) {
+	int ch, i = 0;
+	char str[1000000];
+	gc(ptr, fp);
 }

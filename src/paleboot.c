@@ -1,6 +1,7 @@
 // built in
 #include <gaster.h>
 #include <ensure_dfu.h>
+#include <download.h>
 
 // deps
 #include <libirecovery.h>
@@ -16,11 +17,6 @@ int main(int argc, char **argv) {
     FILE *fs_file;
     char fs[9] = "";
     bool semi_tethered;
-    if (argc > 2) {
-        semi_tethered = strcmp(argv[2], "--tethered") != 0;
-    } else {
-        semi_tethered = true;
-    }
 
     if (!file_exists("./boot")) {
         printf("Couldn't find boot directory!\n");
@@ -31,6 +27,13 @@ int main(int argc, char **argv) {
         printf("Couldn't find iBoot!\n");
         return 1;
     }
+    
+    FILE* iboot_fp = fopen("./boot/ibot.img4", "rb");
+
+    char *iboot_data;
+    read_all(&iboot_data, iboot_fp);
+
+    semi_tethered = strstr((char *)iboot_data, (char *)"rd=disk");
 
     ensure_dfu(semi_tethered);
 
@@ -77,25 +80,25 @@ int main(int argc, char **argv) {
         printf("Failed to send iBoot!\n");
         return 1;
     } else {
-        if (!do_hb_patch || semi_tethered) {
+        if (semi_tethered) {
             printf("Successfully booted device!\n");
             return 0;
         }
     }
 
-    char payload_path[25] = "not.found";
     if (do_hb_patch) {
-        if (file_exists("./boot/payload_t8010.bin")) {
+        char payload_path[25] = "";
+
+        if (device->chip_id == 0x8010) {
+            if (!file_exists("./boot/payload_t8010.bin")) {
+                download_file("https://github.com/palera1n/palera1n/raw/main/other/payload/payload_t8010.bin", "./boot/payload_t8010.bin");
+            }
             strcpy(payload_path, "./boot/payload_t8010.bin");
-        } else if (file_exists("./boot/payload_t8015.bin")) {
+        } else {
+            if (!file_exists("./boot/payload_t8015.bin")) {
+                download_file("https://github.com/palera1n/palera1n/raw/main/other/payload/payload_t8015.bin", "./boot/payload_t8015.bin");
+            }
             strcpy(payload_path, "./boot/payload_t8015.bin");
-        }
-        
-        if (strcmp(payload_path, "not.found")) {
-            printf("PaleBoot detected your device needs payload, but we could not find it in the boot folder.\n");
-            printf("Please copy the correct payload for your device from other/payload in your palera1n folder to the boot folder.\n");
-            printf("If using tethered, please add --tethered to the end of the command\n");
-            return 1;
         }
 
         if (!file_exists("./boot/.fs")) {

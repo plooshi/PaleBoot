@@ -9,13 +9,14 @@ GASTER_OBJS = ./$(OBJDIR)/gaster/gaster.o ./$(OBJDIR)/gaster/lzfse.o
 ifeq ($(shell uname),Darwin)
 USBLIB_FLAGS=
 CFLAGS ?= -O2
-LIBS = -lm -lplist-2.0 -limobiledevice-glue-1.0 -lirecovery-1.0 -limobiledevice-1.0 -lusbmuxd-2.0
+LIBS = -lm -lplist-2.0 -limobiledevice-glue-1.0 -lirecovery-1.0 -limobiledevice-1.0 -lusbmuxd-2.0 -lcurl
 LDFLAGS ?= 
 CC := xcrun -sdk macos clang
 else
 USBLIB_FLAGS=-DHAVE_LIBUSB
 CFLAGS ?= -O2 -static
-LIBS = -lcrypto -lssl -lm -lplist-2.0 -lusb-1.0 -limobiledevice-glue-1.0 -lirecovery-1.0 -limobiledevice-1.0 -lusbmuxd-2.0
+CURL_LIBS=-lcurl -lnghttp2 -lzstd -lbrotlicommon -lbrotlidec -lz
+LIBS = -lcrypto -lssl -lm -lplist-2.0 -lusb-1.0 -limobiledevice-glue-1.0 -lirecovery-1.0 -limobiledevice-1.0 -lusbmuxd-2.0 -lcurl $(CURL_LIBS)
 LDFLAGS ?= -fuse-ld=lld
 CC := clang
 endif
