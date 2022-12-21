@@ -5,7 +5,7 @@ PoC tool to boot palera1n
 So you can boot with palera1n on the go
 
 ## Running:
-First, prepare the boot folder (see below)
+Copy the boot folder from your palera1n directory
 <br>
 Then, run:
 <br>
@@ -16,23 +16,3 @@ Then, run:
 > ./PaleBoot
 <br>
 #### Add --tethered at the end of the command if using tethered.
-
-## How to prepare:
-Make a folder named boot.
-<br>
-Copy these files into the folder:
-
-> All devices:
-- boot/ibot.img4
-
-> iPhone 7(+):
-- other/payload/payload_t8010.bin
-
-> iPhone 8(+):
-- other/payload/payload_t8015.bin
-
-> Other A10 and higher:
-- Everything is already included in All devices
-
-> A9(X) and lower:
-- boot/iBSS.img4
