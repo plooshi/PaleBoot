@@ -21,7 +21,7 @@ LDFLAGS ?= -fuse-ld=lld
 CC := clang
 endif
 
-all: dirs submodules gaster $(OBJS) $(GASTER_OBJS) paleboot
+all: dirs submodules gaster $(OBJS) $(GASTER_OBJS) PaleBoot
 
 dirs:
 	@mkdir -p $(OBJDIR)
@@ -36,8 +36,8 @@ ifeq (,$(wildcard deps/gaster/gaster.mk))
 	@make -f gaster.mk -C deps/gaster -s
 endif
 
-paleboot:
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBDIRS) $(LIBS) $(INCLDIRS) $(OBJS) $(GASTER_OBJS) -o ./PaleBoot
+PaleBoot: $(OBJS) $(GASTER_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBDIRS) $(LIBS) $(INCLDIRS) $(OBJS) $(GASTER_OBJS) -o $@
 
 $(OBJDIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) $(INCLDIRS) -c -o $@ $<
