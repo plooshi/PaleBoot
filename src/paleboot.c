@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 int main(int argc, char **argv) {
     FILE *fs_file;
@@ -30,10 +31,22 @@ int main(int argc, char **argv) {
     
     FILE* iboot_fp = fopen("./boot/ibot.img4", "rb");
 
-    char *iboot_data;
-    read_all(&iboot_data, iboot_fp);
+    if (file_exists("./boot/.semi")) {
+        semi_tethered = true;
+    } else {
+        printf("Doing first-run setup, please wait..."); 
 
-    semi_tethered = strstr((char *)iboot_data, (char *)"rd=disk");
+        char *iboot_data;
+        read_all(&iboot_data, iboot_fp);
+
+        semi_tethered = strstr((char *)iboot_data, (char *)"rd=disk");
+
+        if (semi_tethered) {
+            close(open("./boot/.semi", O_RDWR | O_CREAT, 664));
+        }
+    }
+
+    
 
     ensure_dfu(semi_tethered);
 
