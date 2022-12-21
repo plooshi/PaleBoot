@@ -19,30 +19,53 @@ int main(int argc, char **argv) {
     char fs[9] = "";
     bool semi_tethered;
 
-    if (!file_exists("./boot")) {
+    ensure_dfu(false);
+
+    irecv_client_t client = get_client();
+
+    irecv_device_t device = NULL;
+	irecv_devices_get_device_by_client(client, &device);
+
+    irecv_close(client);
+
+    char *boot_path, *ibot_path, *ibss_path;
+    char *semi_path, *tether_path;
+    
+    sprintf(boot_path, "./boot-%s", device->product_type);
+
+    sprintf(ibot_path, "%s/ibot.img4", boot_path);
+    sprintf(ibss_path, "%s/iBSS.img4", boot_path);
+    sprintf(semi_path, "%s/.semi", boot_path);
+    sprintf(tether_path, "%s/.tether", boot_path);
+
+    if (!file_exists(boot_path)) {
         printf("Couldn't find boot directory!\n");
         return 1;
     }
 
-    if (!file_exists("./boot/ibot.img4")) {
+    if (!file_exists(ibot_path)) {
         printf("Couldn't find iBoot!\n");
         return 1;
     }
 
-    if (file_exists("./boot/.semi")) {
+    if (file_exists(semi_path)) {
         semi_tethered = true;
+    } else if (file_exists(tether_path)) {
+        semi_tethered = false;
     } else {
         printf("Doing first-run setup, please wait...\n"); 
 
-        FILE* iboot_fp = fopen("./boot/ibot.img4", "rb");
-        
+        FILE* iboot_fp = fopen(ibot_path, "rb");
+
         char *iboot_data;
         read_all(&iboot_data, iboot_fp);
 
         semi_tethered = strstr((char *)iboot_data, (char *)"rd=disk");
 
         if (semi_tethered) {
-            close(open("./boot/.semi", O_RDWR | O_CREAT, 664));
+            close(open(semi_path, O_RDWR | O_CREAT, 664));
+        } else {
+            close(open(tether_path, O_RDWR | O_CREAT, 664));
         }
     }
 
@@ -62,19 +85,12 @@ int main(int argc, char **argv) {
 
     sleep(1);
 
-    irecv_client_t client = get_client();
-
-    irecv_device_t device = NULL;
-	irecv_devices_get_device_by_client(client, &device);
-
-    irecv_close(client);
-
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
-        if (!file_exists("./boot/iBSS.img4")) {
+        if (!file_exists(ibss_path)) {
             printf("Could not find iBSS!\n");
             return 1;
         } else {
-            if (send_file("./boot/iBSS.img4") != 0) {
+            if (send_file(ibss_path) != 0) {
                 printf("Failed to send iBSS!\n");
                 return 1;
             }
@@ -87,7 +103,7 @@ int main(int argc, char **argv) {
         strstr("iPhone10,", device->product_type) == device->product_type;
 
     sleep(1);
-    if (send_file("./boot/ibot.img4") != 0) {
+    if (send_file(ibot_path) != 0) {
         printf("Failed to send iBoot!\n");
         return 1;
     } else {
@@ -98,25 +114,29 @@ int main(int argc, char **argv) {
     }
 
     if (do_hb_patch) {
-        char payload_path[25] = "";
+        char payload_path[35] = "";
 
         if (device->chip_id == 0x8010) {
-            if (!file_exists("./boot/payload_t8010.bin")) {
-                download_file("https://github.com/palera1n/palera1n/raw/main/other/payload/payload_t8010.bin", "./boot/payload_t8010.bin");
+            sprintf(payload_path, "%s/payload_t8010.bin", boot_path);
+            if (!file_exists(payload_path)) {
+                download_file("https://github.com/palera1n/palera1n/raw/main/other/payload/payload_t8010.bin", payload_path);
             }
-            strcpy(payload_path, "./boot/payload_t8010.bin");
         } else {
-            if (!file_exists("./boot/payload_t8015.bin")) {
-                download_file("https://github.com/palera1n/palera1n/raw/main/other/payload/payload_t8015.bin", "./boot/payload_t8015.bin");
+            sprintf(payload_path, "%s/payload_t8010.bin", boot_path);
+            if (!file_exists(payload_path)) {
+                download_file("https://github.com/palera1n/palera1n/raw/main/other/payload/payload_t8015.bin", payload_path);
             }
-            strcpy(payload_path, "./boot/payload_t8015.bin");
         }
 
-        if (!file_exists("./boot/.fs")) {
-            printf("Couldn't find boot/.fs!\n");
+        char *fs_path;
+
+        sprintf(fs_path, "%s/.fs", boot_path);
+
+        if (!file_exists(fs_path)) {
+            printf("Couldn't find %s!\n", fs_path);
             return 1;
         } else {
-            fs_file = fopen("./boot/.fs", "r");
+            fs_file = fopen(fs_path, "r");
             fgets(fs, 9, fs_file);
             fclose(fs_file);
         }
