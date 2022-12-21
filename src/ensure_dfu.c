@@ -99,7 +99,7 @@ bool dfuhelper(unsigned int cpid, char *product_type, bool semi_tethered) {
     }
 }
 
-bool wait_recovery(semi_tethered) {
+bool wait_recovery(bool semi_tethered) {
     usb_handle_t *found_targets;
     int targets[][2] = {
         {0x05ac, 0x1281}
@@ -149,8 +149,46 @@ bool ensure_dfu(bool semi_tethered) {
             }
         }
 
-
         return dfuhelper(cpid, product, semi_tethered);
+    } else if (strcmp(device_mode, "dfu") == 0) {
+        return true;
+    }
+
+    return false;
+}
+
+bool wait_recovery_no_fix() {
+    usb_handle_t *found_targets;
+    int targets[][2] = {
+        {0x05ac, 0x1281}
+    };
+    wait_usb_handles(&found_targets, targets, sizeof(targets) / sizeof(targets[0]));
+
+    return ensure_dfu_no_fix();
+}
+
+bool ensure_dfu_no_fix() {
+    const char *device_mode = get_device_mode();
+
+    if (strcmp(device_mode, "too_many") == 0) {
+        printf("More than once device detected! Please have only the device you would like to boot plugged in.\n");
+        return false;
+    } else if (strcmp(device_mode, "normal") == 0) {
+        char *udid;
+
+        get_udid(&udid);
+
+        if (strcmp(udid, "error") == 0) {
+            printf("Failed to get udid!\n");
+            return false;
+        }
+
+        if (!enter_recovery(udid)) return false;
+
+        printf("Waiting for device in recovery mode.\n");
+        return wait_recovery_no_fix();
+    } else if (strcmp(device_mode, "recovery") == 0) {
+        return true;
     } else if (strcmp(device_mode, "dfu") == 0) {
         return true;
     }

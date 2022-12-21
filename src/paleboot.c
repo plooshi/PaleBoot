@@ -2,6 +2,7 @@
 #include <gaster.h>
 #include <ensure_dfu.h>
 #include <download.h>
+#include <device_detection.h>
 
 // deps
 #include <libirecovery.h>
@@ -19,7 +20,7 @@ int main() {
     char fs[9] = "";
     bool semi_tethered;
 
-    ensure_dfu(false);
+    ensure_dfu_no_fix();
 
     irecv_client_t client = get_client();
 
