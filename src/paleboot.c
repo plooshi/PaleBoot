@@ -14,7 +14,7 @@
 #include <string.h>
 #include <fcntl.h>
 
-int main(int argc, char **argv) {
+int main() {
     FILE *fs_file;
     char fs[9] = "";
     bool semi_tethered;
@@ -28,8 +28,8 @@ int main(int argc, char **argv) {
 
     irecv_close(client);
 
-    char *boot_path, *ibot_path, *ibss_path;
-    char *semi_path, *tether_path;
+    char boot_path[18], ibot_path[28], ibss_path[28];
+    char semi_path[24], tether_path[26];
     
     sprintf(boot_path, "./boot-%s", device->product_type);
 
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
         char *iboot_data;
         read_all(&iboot_data, iboot_fp);
 
-        semi_tethered = strstr((char *)iboot_data, (char *)"rd=disk");
+        semi_tethered = strstr(iboot_data, "rd=disk");
 
         if (semi_tethered) {
             close(open(semi_path, O_RDWR | O_CREAT, 664));
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
     }
 
     if (do_hb_patch) {
-        char payload_path[35] = "";
+        char payload_path[36] = "";
 
         if (device->chip_id == 0x8010) {
             sprintf(payload_path, "%s/payload_t8010.bin", boot_path);
@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
             }
         }
 
-        char *fs_path;
+        char fs_path[22];
 
         sprintf(fs_path, "%s/.fs", boot_path);
 
