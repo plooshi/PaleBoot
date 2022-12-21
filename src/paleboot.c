@@ -28,14 +28,14 @@ int main(int argc, char **argv) {
         printf("Couldn't find iBoot!\n");
         return 1;
     }
-    
-    FILE* iboot_fp = fopen("./boot/ibot.img4", "rb");
 
     if (file_exists("./boot/.semi")) {
         semi_tethered = true;
     } else {
-        printf("Doing first-run setup, please wait..."); 
+        printf("Doing first-run setup, please wait...\n"); 
 
+        FILE* iboot_fp = fopen("./boot/ibot.img4", "rb");
+        
         char *iboot_data;
         read_all(&iboot_data, iboot_fp);
 
@@ -45,8 +45,6 @@ int main(int argc, char **argv) {
             close(open("./boot/.semi", O_RDWR | O_CREAT, 664));
         }
     }
-
-    
 
     ensure_dfu(semi_tethered);
 
