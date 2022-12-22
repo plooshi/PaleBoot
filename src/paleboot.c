@@ -20,7 +20,10 @@ int main() {
     char fs[9] = "";
     bool semi_tethered;
 
-    ensure_dfu_no_fix();
+    if (!ensure_dfu_no_fix()) {
+        printf("Unable to find device in DFU mode!\n");
+        return 1;
+    }
 
     irecv_client_t client = get_client();
 
@@ -70,7 +73,10 @@ int main() {
         }
     }
 
-    ensure_dfu(semi_tethered);
+    if (!ensure_dfu(semi_tethered)) {
+        printf("Unable to find device in DFU mode!\n");
+        return 1;
+    };
 
     usb_handle_t handle;
 
