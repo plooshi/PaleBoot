@@ -8,5 +8,32 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y aria2 xxd clang lld
+        sudo apt remove -y libssl-dev libusb-1.0-0-dev
+    
+    - name: Compile OpenSSL
+      run: |
+        aria2c https://www.openssl.org/source/openssl-3.0.7.tar.gz
+        tar -zxvf openssl-3.0.7.tar.gz
+        cd openssl-3.0.7
+        ./Configure enable-ec_nistp_64_gcc_128 linux-x86_64 "-Wa,--noexecstack -fPIC"
+        make depend -j4
+        make -j4
+        sudo make install_sw install_ssldirs
+        sudo rm -rf /usr/local/lib/libcrypto.so* /usr/local/lib/libssl.so*
+    
+    - name: Compile libusb
+      run: |
+        aria2c https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.tar.bz2
+        tar -xf libusb-1.0.26.tar.bz2
+        cd libusb-1.0.26
+        ./configure --disable-shared --enable-static --disable-udev LDFLAGS="-static"
+        make -j$(nproc)
+        sudo make install
+
     - name: Compile
       run: make
