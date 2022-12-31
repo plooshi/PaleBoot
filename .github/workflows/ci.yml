@@ -18,7 +18,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y aria2 xxd clang lld
+        sudo apt install -y aria2 xxd lld autoconf automake ca-certificates clang cmake gcc git gnupg libtool make libncurses6 libnghttp2-dev libssl-dev pkgconf wget xzip zlib1g-dev
         sudo apt remove -y libssl-dev libusb-1.0-0-dev
     
     - name: Compile OpenSSL
