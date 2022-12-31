@@ -1,0 +1,102 @@
+name: Compile PaleBoot
+
+on: [ "push", "pull_request" ]
+
+env:
+  CC: "clang"
+  CXX: "clang++"
+  LD: "ld.lld"
+  LDFLAGS: "-fuse-ld=lld -L/usr/local/lib -L/usr/local/lib64 -ltinfo -fno-pie -static -static-libgcc -Wl,--no-dynamic-linker -Wl,-static"
+  PKG_CONFIG_PATH: "/usr/lib:/usr/local/lib:/usr/local/lib64"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y aria2 xxd lld autoconf automake ca-certificates clang cmake gcc git gnupg libtool make libncurses6 libnghttp2-dev libssl-dev pkgconf wget xzip zlib1g-dev
+        sudo apt remove -y libssl-dev libusb-1.0-0-dev
+    
+    - name: Compile OpenSSL
+      run: |
+        aria2c https://www.openssl.org/source/openssl-3.0.7.tar.gz
+        tar -zxvf openssl-3.0.7.tar.gz
+        cd openssl-3.0.7
+        ./Configure enable-ec_nistp_64_gcc_128 linux-x86_64 "-Wa,--noexecstack -fPIC"
+        make depend -j4
+        make -j4
+        sudo make install_sw install_ssldirs
+        sudo rm -rf /usr/local/lib/libcrypto.so* /usr/local/lib/libssl.so*
+    
+    - name: Compile libusb
+      run: |
+        aria2c https://github.com/libusb/libusb/releases/download/v1.0.26/libusb-1.0.26.tar.bz2
+        tar -xf libusb-1.0.26.tar.bz2
+        cd libusb-1.0.26
+        ./configure --disable-shared --enable-static --disable-udev LDFLAGS="-static"
+        make -j$(nproc)
+        sudo make install
+    
+    - name: Compile libcurl
+      run: |
+        wget https://curl.se/download/curl-7.86.0.tar.xz
+        tar -xvf curl-7.86.0.tar.xz
+        cd curl-7.86.0
+        autoreconf -i
+        ./configure --disable-shared --without-brotli --with-openssl
+        make -j$(nproc)
+        sudo make install
+
+    - name: Compile libplist
+      run: |
+        git clone --single-branch --depth 1 https://github.com/libimobiledevice/libplist.git libplist
+        cd libplist
+        ./autogen.sh --disable-shared --without-cython
+        make -j$(nproc)
+        sudo make install
+    
+    - name: Compile limd-glue
+      run: |
+        git clone --single-branch --depth 1 https://github.com/libimobiledevice/libimobiledevice-glue.git limd_glue
+        cd limd_glue
+        ./autogen.sh --disable-shared
+        make -j$(nproc)
+        sudo make install
+    
+    - name: Compile libusbmuxd
+      run: |
+        git clone --single-branch --depth 1 https://github.com/libimobiledevice/libusbmuxd.git libusbmuxd
+        cd libusbmuxd
+        ./autogen.sh --disable-shared
+        make -j$(nproc)
+        sudo make install
+    
+    - name: Compile limd
+      run: |
+        git clone --single-branch --depth 1 https://github.com/Ploosho/libimobiledevice.git limd
+        cd limd
+        ./autogen.sh --disable-shared --without-cython
+        make -j$(nproc)
+        sudo make install
+    
+    - name: Compile irecovery
+      run: |
+        git clone --single-branch --depth 1 https://github.com/palera1n/libirecovery.git irecv
+        cd irecv
+        ./autogen.sh --disable-shared
+        make -j$(nproc)
+        sudo make install
+
+    - name: Compile PaleBoot
+      run: make
+    
+    - name: Upload PaleBoot
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: PaleBoot
+        path: PaleBoot
