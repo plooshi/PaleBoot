@@ -7,7 +7,7 @@ env:
   CXX: "clang++"
   LD: "ld.lld"
   LDFLAGS: "-fuse-ld=lld -L/usr/local/lib -L/usr/local/lib64 -no-pie -static -static-libgcc -Wl,--no-dynamic-linker -Wl,-static"
-  PKG_CONFIG_PATH: "/usr/lib:/usr/local/lib:/usr/local/ssl"
+  PKG_CONFIG_PATH: "/usr/lib:/usr/local/lib:/usr/local/lib64"
 
 jobs:
   build:
