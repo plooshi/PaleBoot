@@ -2,6 +2,12 @@ name: Compile PaleBoot
 
 on: [ "push", "pull_request" ]
 
+env:
+  CC: "clang"
+  CXX: "clang++"
+  LD: "ld.lld"
+  LDFLAGS: "-no-pie -static -static-libgcc -Wl,--no-dynamic-linker -Wl,-static"
+
 jobs:
   build:
     runs-on: ubuntu-latest
