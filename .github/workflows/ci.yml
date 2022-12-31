@@ -78,7 +78,7 @@ jobs:
     
     - name: Compile limd
       run: |
-        git clone --single-branch --depth 1 https://github.com/libimobiledevice/libimobiledevice.git limd
+        git clone --single-branch --depth 1 https://github.com/Ploosho/libimobiledevice.git limd
         cd limd
         ./autogen.sh --disable-shared --without-cython
         make -j$(nproc)
