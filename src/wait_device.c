@@ -1,6 +1,7 @@
 #include <gaster.h>
 #include <wait_device.h>
 #include <stdio.h>
+#include <logging.h>
 
 #ifdef USE_LIBUSB
 int wait_usb_handles(usb_handle_t **found_targets, int targets[][2], unsigned int target_count) {
@@ -10,7 +11,7 @@ int wait_usb_handles(usb_handle_t **found_targets, int targets[][2], unsigned in
     unsigned int found_count = 0;
 
     if (libusb_init(&context) == LIBUSB_SUCCESS) {
-        printf("Waiting for devices...\n");
+        log_debug("Waiting for devices...\n");
 
         for (;;) {
             ssize_t device_cnt = libusb_get_device_list(context, &list);
@@ -56,6 +57,8 @@ int wait_usb_handles(usb_handle_t **found_targets, int targets[][2], unsigned in
     usb_handle_t found_targets_big[1024];
     unsigned int found_count = 0;
 
+    log_debug("Waiting for devices...\n");
+    
     while((matching_dict = IOServiceMatching(kIOUSBDeviceClassName)) != NULL) {
         if(IOServiceGetMatchingServices(0, matching_dict, &iter) == kIOReturnSuccess) {
             while((serv = IOIteratorNext(iter)) != IO_OBJECT_NULL) {

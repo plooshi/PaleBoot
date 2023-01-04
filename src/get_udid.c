@@ -1,6 +1,9 @@
+// deps
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/lockdown.h>
 #include <libimobiledevice-glue/utils.h>
+
+// std c library
 #include <stdlib.h>
 #include <string.h>
 

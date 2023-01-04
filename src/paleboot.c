@@ -3,6 +3,7 @@
 #include <ensure_dfu.h>
 #include <download.h>
 #include <device_detection.h>
+#include <logging.h>
 
 // deps
 #include <libirecovery.h>
@@ -21,7 +22,7 @@ int main() {
     bool semi_tethered;
 
     if (!ensure_dfu_no_fix()) {
-        printf("Unable to find device in DFU mode!\n");
+        log_error("Unable to find device in DFU mode!\n");
         return 1;
     }
 
@@ -43,12 +44,12 @@ int main() {
     sprintf(tether_path, "%s/.tether", boot_path);
 
     if (!file_exists(boot_path)) {
-        printf("Couldn't find boot directory!\n");
+        log_error("Couldn't find boot directory!\n");
         return 1;
     }
 
     if (!file_exists(ibot_path)) {
-        printf("Couldn't find iBoot!\n");
+        log_error("Couldn't find iBoot!\n");
         return 1;
     }
 
@@ -57,7 +58,7 @@ int main() {
     } else if (file_exists(tether_path)) {
         semi_tethered = false;
     } else {
-        printf("Doing first-run setup, please wait...\n"); 
+        log_debug("Doing first-run setup, please wait...\n"); 
 
         FILE* iboot_fp = fopen(ibot_path, "rb");
 
@@ -74,19 +75,19 @@ int main() {
     }
 
     if (!ensure_dfu(semi_tethered)) {
-        printf("Unable to find device in DFU mode!\n");
+        log_error("Unable to find device in DFU mode!\n");
         return 1;
     };
 
     usb_handle_t handle;
 
     if (!gaster_checkm8(&handle)) {
-        printf("Failed to pwn!\n");
+        log_error("Failed to pwn!\n");
         return 1;
     }
 
     if (!gaster_reset(&handle)) {
-        printf("Failed to reset!\n");
+        log_error("Failed to reset!\n");
         return 1;
     }
 
@@ -94,11 +95,11 @@ int main() {
 
     if (device->chip_id != 0x8010 && device->chip_id != 0x8015) {
         if (!file_exists(ibss_path)) {
-            printf("Could not find iBSS!\n");
+            log_error("Could not find iBSS!\n");
             return 1;
         } else {
             if (send_file(ibss_path) != 0) {
-                printf("Failed to send iBSS!\n");
+                log_error("Failed to send iBSS!\n");
                 return 1;
             }
 
@@ -111,11 +112,11 @@ int main() {
 
     sleep(1);
     if (send_file(ibot_path) != 0) {
-        printf("Failed to send iBoot!\n");
+        log_error("Failed to send iBoot!\n");
         return 1;
     } else {
-        if (semi_tethered) {
-            printf("Successfully booted device!\n");
+        if (semi_tethered && !do_hb_patch) {
+            log_info("Successfully booted device!\n");
             return 0;
         }
     }
@@ -140,7 +141,7 @@ int main() {
         sprintf(fs_path, "%s/.fs", boot_path);
 
         if (!file_exists(fs_path)) {
-            printf("Couldn't find %s!\n", fs_path);
+            log_error("Couldn't find %s!\n", fs_path);
             return 1;
         } else {
             fs_file = fopen(fs_path, "r");
@@ -151,35 +152,35 @@ int main() {
         sleep(3);
 
         if (run_command("dorwx") != 0) {
-            printf("Failed to run dorwx!\n");
+            log_error("Failed to run dorwx!\n");
             return 1;
         }
 
         sleep(2);
         
         if (send_file(payload_path) != 0) {
-            printf("Failed to send payload!\n");
+            log_error("Failed to send payload!\n");
             return 1;
         }
 
         sleep(3);
 
         if (run_command("go") != 0) {
-            printf("Failed to boot payload!\n");
+            log_error("Failed to boot payload!\n");
             return 1;
         };
 
         sleep(1);
 
         if (run_command("go xargs -v serial=3") != 0) {
-            printf("Failed to set boot args!\n");
+            log_error("Failed to set boot args!\n");
             return 1;
         }
 
         sleep(1);
 
         if (run_command("go xfb") != 0) {
-            printf("Failed to init framebuffer!\n");
+            log_error("Failed to init framebuffer!\n");
             return 1;
         }
 
@@ -188,22 +189,22 @@ int main() {
         char boot_command[18] = "";
         snprintf(boot_command, 18, "go boot %s", fs);
         if (run_command(boot_command) != 0) {
-            printf("Failed to boot!\n");
+            log_error("Failed to boot device!\n");
             return 1;
         } else {
-            printf("Successfully booted device!\n");
+            log_info("Successfully booted device!\n");
             return 0;
         }
     }
-    
-    sleep(2);
 
     if (!semi_tethered) {
+        sleep(2);
+
         if (run_command("fsboot") != 0) {
-            printf("Failed to fsboot!\n");
+            log_error("Failed to fsboot!\n");
             return 1;
         } else {
-            printf("Successfully booted device!\n");
+            log_info("Successfully booted device!\n");
             return 0;
         }
     }

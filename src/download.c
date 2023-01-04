@@ -1,5 +1,8 @@
-#include <stdio.h>
+// deps
 #include <curl/curl.h>
+
+// std c library
+#include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
 

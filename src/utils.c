@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <logging.h>
 
 void print_progress_bar(double progress) {
 	int i = 0;
@@ -49,7 +50,7 @@ irecv_client_t get_client() {
 	for (i = 0; i <= 5; i++) {
 		irecv_error_t err = irecv_open_with_ecid(&client, ecid);
 		if (err == IRECV_E_UNSUPPORTED) {
-			fprintf(stderr, "ERROR: %s\n", irecv_strerror(err));
+			log_error("ERROR: %s\n", irecv_strerror(err));
 			return NULL;
 		}
 		else if (err != IRECV_E_SUCCESS)
@@ -58,7 +59,7 @@ irecv_client_t get_client() {
 			break;
 
 		if (i == 5) {
-			fprintf(stderr, "ERROR: %s\n", irecv_strerror(err));
+			log_error("ERROR: %s\n", irecv_strerror(err));
 			return NULL;
 		}
 	}
@@ -72,7 +73,7 @@ int send_file(const char *filename) {
 	irecv_error_t error = irecv_send_file(client, filename, 1);
     irecv_close(client);
     if (error != 0) {
-	    printf("%s\n", irecv_strerror(error));
+	    log_error("%s\n", irecv_strerror(error));
         return error;
     }
     return 0;
@@ -83,7 +84,7 @@ int run_command(const char *command) {
     irecv_error_t error = irecv_send_command(client, command);
     irecv_close(client);
     if (error != 0) {
-	    printf("%s\n", irecv_strerror(error));
+	    log_error("%s\n", irecv_strerror(error));
         return error;
     }
     return 0;

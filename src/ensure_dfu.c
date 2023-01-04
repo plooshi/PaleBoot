@@ -6,6 +6,7 @@
 #include <usb.h>
 #include <wait_device.h>
 #include <gaster.h>
+#include <logging.h>
 
 // deps
 #include <libimobiledevice/libimobiledevice.h>
@@ -26,33 +27,33 @@ bool enter_recovery(char *udid) {
 
     ret = idevice_new(&device, udid);
     if (ret != IDEVICE_E_SUCCESS) {
-        printf("Unable to connect to device!\n");
+        log_error("Unable to connect to device!\n");
         return false;
     }
 
     if (LOCKDOWN_E_SUCCESS != (ldret = lockdownd_client_new(device, &client, "PaleBoot"))) {
-        printf("Could not connect to lockdownd: %s (%d)\n", lockdownd_strerror(ldret), ldret);
+        log_error("Could not connect to lockdownd: %s (%d)\n", lockdownd_strerror(ldret), ldret);
         idevice_free(device);
         return false;
     }
 
-    printf("Sending device into recovery mode.\n");
+    log_debug("Sending device into recovery mode.\n");
     ldret = lockdownd_enter_recovery(client);
 	if (ldret == LOCKDOWN_E_SESSION_INACTIVE) {
 		lockdownd_client_free(client);
 		client = NULL;
 		if (LOCKDOWN_E_SUCCESS != (ldret = lockdownd_client_new_with_handshake(device, &client, "PaleBoot"))) {
-			printf("Could not connect to lockdownd: %s (%d)\n", lockdownd_strerror(ldret), ldret);
+			log_error("Could not connect to lockdownd: %s (%d)\n", lockdownd_strerror(ldret), ldret);
 			idevice_free(device);
 			return false;
 		}
 		ldret = lockdownd_enter_recovery(client);
 	}
 	if (ldret != LOCKDOWN_E_SUCCESS) {
-		printf("Failed to enter recovery mode!\n");
+		log_error("Failed to enter recovery mode!\n");
 		res = false;
 	} else {
-		printf("Device is now going into recovery mode.\n");
+		log_info("Device is now going into recovery mode.\n");
 	}
 
     lockdownd_client_free(client);
@@ -79,7 +80,7 @@ bool dfuhelper(unsigned int cpid, char *product_type, bool semi_tethered) {
     } else {
         step_one = "Hold home + power button";
     }
-    printf("Press any key when ready for DFU mode\n");
+    log_info("Press any key when ready for DFU mode\n");
     getchar();
     step(3, "Get ready");
     step(10, step_one);
@@ -91,10 +92,10 @@ bool dfuhelper(unsigned int cpid, char *product_type, bool semi_tethered) {
     }
 
     if (ensure_dfu(semi_tethered)) {
-        printf("Device successfully entered DFU mode!\n");
+        log_info("Device successfully entered DFU mode!\n");
         return true;
     } else {
-        printf("Device did not enter DFU mode, please run PaleBoot again.\n");
+        log_error("Device did not enter DFU mode, please run PaleBoot again.\n");
         return false;
     }
 }
@@ -113,7 +114,7 @@ bool ensure_dfu(bool semi_tethered) {
     const char *device_mode = get_device_mode();
 
     if (strcmp(device_mode, "too_many") == 0) {
-        printf("More than once device detected! Please have only the device you would like to boot plugged in.\n");
+        log_error("More than once device detected! Please have only the device you would like to boot plugged in.\n");
         return false;
     } else if (strcmp(device_mode, "normal") == 0) {
         char *udid;
@@ -121,13 +122,13 @@ bool ensure_dfu(bool semi_tethered) {
         get_udid(&udid);
 
         if (strcmp(udid, "error") == 0) {
-            printf("Failed to get udid!\n");
+            log_error("Failed to get udid!\n");
             return false;
         }
 
         if (!enter_recovery(udid)) return false;
 
-        printf("Waiting for device in recovery mode.\n");
+        log_info("Waiting for device in recovery mode.\n");
         return wait_recovery(semi_tethered);
     } else if (strcmp(device_mode, "recovery") == 0) {
         irecv_client_t client = get_client();
@@ -141,11 +142,11 @@ bool ensure_dfu(bool semi_tethered) {
 
         if (!semi_tethered) {
             if (set_env("auto-boot", "false") != 0) {
-                printf("Failed to fix auto boot value!\n");
+                log_warn("Failed to fix auto boot value!\n");
             }
         } else {
             if (set_env("auto-boot", "true") != 0) {
-                printf("Failed to fix auto boot value!\n");
+                log_warn("Failed to fix auto boot value!\n");
             }
         }
 
@@ -171,7 +172,7 @@ bool ensure_dfu_no_fix() {
     const char *device_mode = get_device_mode();
 
     if (strcmp(device_mode, "too_many") == 0) {
-        printf("More than once device detected! Please have only the device you would like to boot plugged in.\n");
+        log_error("More than once device detected! Please have only the device you would like to boot plugged in.\n");
         return false;
     } else if (strcmp(device_mode, "normal") == 0) {
         char *udid;
@@ -179,13 +180,13 @@ bool ensure_dfu_no_fix() {
         get_udid(&udid);
 
         if (strcmp(udid, "error") == 0) {
-            printf("Failed to get udid!\n");
+            log_error("Failed to get udid!\n");
             return false;
         }
 
         if (!enter_recovery(udid)) return false;
 
-        printf("Waiting for device in recovery mode.\n");
+        log_info("Waiting for device in recovery mode.\n");
         return wait_recovery_no_fix();
     } else if (strcmp(device_mode, "recovery") == 0) {
         return true;
