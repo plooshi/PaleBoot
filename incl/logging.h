@@ -11,7 +11,7 @@
 
 #define log_debug(str, ...) _log_base(str, _color_debug, ##__VA_ARGS__)
 #define log_error(str, ...) _log_base(str, _color_error, ##__VA_ARGS__)
-#define log_info(str, ...) _log_base(str, _color_ok, ##__VA_ARGS__)
+#define log_info(str, ...) _log_base(str, _color_info, ##__VA_ARGS__)
 #define log_warn(str, ...) _log_base(str, _color_warn, ##__VA_ARGS__)
 
 #endif
