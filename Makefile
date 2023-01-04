@@ -36,6 +36,9 @@ ifeq (,$(wildcard deps/gaster/gaster.mk))
 	@make -f gaster.mk -C deps/gaster -s
 endif
 
+clean:
+    @rm -rf PaleBoot obj
+
 PaleBoot: $(OBJS) $(GASTER_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBDIRS) $(LIBS) $(INCLDIRS) $(OBJS) $(GASTER_OBJS) -o $@
 
