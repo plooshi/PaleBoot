@@ -50,7 +50,7 @@ irecv_client_t get_client() {
 	for (i = 0; i <= 5; i++) {
 		irecv_error_t err = irecv_open_with_ecid(&client, ecid);
 		if (err == IRECV_E_UNSUPPORTED) {
-			log_error("ERROR: %s\n", irecv_strerror(err));
+			log_error("%s\n", irecv_strerror(err));
 			return NULL;
 		}
 		else if (err != IRECV_E_SUCCESS)
@@ -59,7 +59,7 @@ irecv_client_t get_client() {
 			break;
 
 		if (i == 5) {
-			log_error("ERROR: %s\n", irecv_strerror(err));
+			log_error("%s\n", irecv_strerror(err));
 			return NULL;
 		}
 	}
