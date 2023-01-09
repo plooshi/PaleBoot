@@ -11,8 +11,6 @@ Then, run:
 <br>
 ### Linux:
 > sudo ./PaleBoot
-<br>
 ### macOS:
 > ./PaleBoot
-<br>
 #### Add --tethered at the end of the command if using tethered.
