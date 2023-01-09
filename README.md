@@ -18,6 +18,9 @@ Copy the boot folder from your palera1n directory
 <br>
 Then, run:
 <br>
-<code> sudo ./PaleBoot </code> if on a Linux system.
-<code> ./PaleBoot </code> if on macOS
+<code> sudo ./PaleBoot </code> if on Linux.
+<br>
+<code> ./PaleBoot </code> if on macOS.
+<br>
 Add <code>--tethered</code> to the end of the command if you are using tethered palera1n, like this: <code>./PaleBoot --tethered</code>/<code>sudo ./PaleBoot --tethered</code>
+<br>
